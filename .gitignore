@@ -1,0 +1,35 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+.venv/
+env/
+venv/
+ENV/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Raw and generated large datasets (reproducible via `make preprocess`)
+data/raw/
+data/processed/*.parquet
+
+# Machine learning model binaries (large binary files > 75 MB: rf_model.pkl is 78.4 MB)
+# Excluded from standard Git tree; tracked via cryptographic models/manifest.json
+models/*.pkl
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Logs and runtime artifacts
+*.log

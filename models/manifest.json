@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-10-20T12:00:00Z",
+  "description": "Cryptographic SHA-256 integrity manifest for Network IDS model artifacts",
+  "artifacts": {
+    "rf_model.pkl": {
+      "sha256": "d56190eeb2b761d98c9f6e399c79d64b833a678146ec3fbb99c16002698c727f",
+      "size_bytes": 82180752,
+      "type": "RandomForestClassifier"
+    },
+    "rf_scaler.pkl": {
+      "sha256": "1aa1ddf0280fcc9c6ad22654afea265d1f7c6727ee2767e148141488eab3f40c",
+      "size_bytes": 2297,
+      "type": "StandardScaler"
+    },
+    "iforest_model.pkl": {
+      "sha256": "cce40a8d45a58551865f1417d7bb2dd13d725957a8197d338277545a0b8acb25",
+      "size_bytes": 1459943,
+      "type": "IsolationForest"
+    },
+    "iforest_threshold.json": {
+      "sha256": "ee1d824598a003fd63571953976654057c3b9a081f5acd5fe0edb10d64ab65d3",
+      "size_bytes": 38,
+      "type": "ThresholdConfig"
+    }
+  }
+}

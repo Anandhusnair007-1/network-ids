@@ -1,0 +1,139 @@
+Found 8 CSV files
+
+===========================================================================
+FILE: Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv
+SIZE: 73.6 MB
+
+Total rows: 225,745
+Columns: 79
+Missing cells: 4
+Missing labels: 0
+Infinite numeric values: 64
+
+Complete label counts:
+  DDoS: 128,027
+  BENIGN: 97,718
+
+First 10 columns:
+['Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets', 'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Max', 'Fwd Packet Length Min', 'Fwd Packet Length Mean', 'Fwd Packet Length Std']
+===========================================================================
+FILE: Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv
+SIZE: 73.3 MB
+
+Total rows: 286,467
+Columns: 79
+Missing cells: 15
+Missing labels: 0
+Infinite numeric values: 727
+
+Complete label counts:
+  PortScan: 158,930
+  BENIGN: 127,537
+
+First 10 columns:
+['Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets', 'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Max', 'Fwd Packet Length Min', 'Fwd Packet Length Mean', 'Fwd Packet Length Std']
+===========================================================================
+FILE: Friday-WorkingHours-Morning.pcap_ISCX.csv
+SIZE: 55.6 MB
+
+Total rows: 191,033
+Columns: 79
+Missing cells: 28
+Missing labels: 0
+Infinite numeric values: 216
+
+Complete label counts:
+  BENIGN: 189,067
+  Bot: 1,966
+
+First 10 columns:
+['Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets', 'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Max', 'Fwd Packet Length Min', 'Fwd Packet Length Mean', 'Fwd Packet Length Std']
+===========================================================================
+FILE: Monday-WorkingHours.pcap_ISCX.csv
+SIZE: 168.7 MB
+
+Total rows: 529,918
+Columns: 79
+Missing cells: 64
+Missing labels: 0
+Infinite numeric values: 810
+
+Complete label counts:
+  BENIGN: 529,918
+
+First 10 columns:
+['Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets', 'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Max', 'Fwd Packet Length Min', 'Fwd Packet Length Mean', 'Fwd Packet Length Std']
+===========================================================================
+FILE: Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv
+SIZE: 79.3 MB
+
+Total rows: 288,602
+Columns: 79
+Missing cells: 18
+Missing labels: 0
+Infinite numeric values: 396
+
+Complete label counts:
+  BENIGN: 288,566
+  Infiltration: 36
+
+First 10 columns:
+['Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets', 'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Max', 'Fwd Packet Length Min', 'Fwd Packet Length Mean', 'Fwd Packet Length Std']
+===========================================================================
+FILE: Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv
+SIZE: 49.6 MB
+
+Total rows: 170,366
+Columns: 79
+Missing cells: 20
+Missing labels: 0
+Infinite numeric values: 250
+
+Complete label counts:
+  BENIGN: 168,186
+  Web Attack � Brute Force: 1,507
+  Web Attack � XSS: 652
+  Web Attack � Sql Injection: 21
+
+First 10 columns:
+['Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets', 'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Max', 'Fwd Packet Length Min', 'Fwd Packet Length Mean', 'Fwd Packet Length Std']
+===========================================================================
+FILE: Tuesday-WorkingHours.pcap_ISCX.csv
+SIZE: 128.8 MB
+
+Total rows: 445,909
+Columns: 79
+Missing cells: 201
+Missing labels: 0
+Infinite numeric values: 327
+
+Complete label counts:
+  BENIGN: 432,074
+  FTP-Patator: 7,938
+  SSH-Patator: 5,897
+
+First 10 columns:
+['Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets', 'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Max', 'Fwd Packet Length Min', 'Fwd Packet Length Mean', 'Fwd Packet Length Std']
+===========================================================================
+FILE: Wednesday-workingHours.pcap_ISCX.csv
+SIZE: 214.7 MB
+
+Total rows: 692,703
+Columns: 79
+Missing cells: 1,008
+Missing labels: 0
+Infinite numeric values: 1,586
+
+Complete label counts:
+  BENIGN: 440,031
+  DoS Hulk: 231,073
+  DoS GoldenEye: 10,293
+  DoS slowloris: 5,796
+  DoS Slowhttptest: 5,499
+  Heartbleed: 11
+
+First 10 columns:
+['Destination Port', 'Flow Duration', 'Total Fwd Packets', 'Total Backward Packets', 'Total Length of Fwd Packets', 'Total Length of Bwd Packets', 'Fwd Packet Length Max', 'Fwd Packet Length Min', 'Fwd Packet Length Mean', 'Fwd Packet Length Std']
+
+Full dataset audit completed.
+Raw CSV files were not modified.

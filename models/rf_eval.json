@@ -1,0 +1,7 @@
+{
+  "macro_precision": 0.9371,
+  "macro_recall": 0.9961,
+  "macro_f1": 0.953,
+  "false_positive_rate": 0.0026,
+  "val_rows": 504037
+}

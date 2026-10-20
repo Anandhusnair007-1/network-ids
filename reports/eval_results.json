@@ -1,0 +1,53 @@
+{
+  "known_attack_test": {
+    "rf_only": {
+      "label": "RF-only (test)",
+      "precision": 0.9875,
+      "recall": 0.9994,
+      "f1": 0.9934,
+      "fpr": 0.0026,
+      "n_rows": 504037,
+      "n_alerts": 85762
+    },
+    "hybrid": {
+      "label": "Hybrid  (test)",
+      "precision": 0.6821,
+      "recall": 0.9995,
+      "f1": 0.8108,
+      "fpr": 0.0942,
+      "n_rows": 504037,
+      "n_alerts": 124172
+    }
+  },
+  "withheld_experiment": {
+    "total_withheld_rows": 2179,
+    "rf_detected": 94,
+    "if_detected": 123,
+    "hybrid_detected": 217,
+    "rf_detection_rate": 0.0431,
+    "if_detection_rate": 0.0564,
+    "hybrid_detection_rate": 0.0996,
+    "per_label": {
+      "Web Attack \ufffd Brute Force": {
+        "total": 1470,
+        "rf_detected": 69,
+        "if_detected": 74
+      },
+      "Web Attack \ufffd XSS": {
+        "total": 652,
+        "rf_detected": 21,
+        "if_detected": 18
+      },
+      "Infiltration": {
+        "total": 36,
+        "rf_detected": 0,
+        "if_detected": 31
+      },
+      "Web Attack \ufffd Sql Injection": {
+        "total": 21,
+        "rf_detected": 4,
+        "if_detected": 0
+      }
+    }
+  }
+}
