@@ -31,7 +31,7 @@ from sklearn.metrics import (
 
 # Add src to path so hybrid.py is importable when run from project root
 sys.path.insert(0, str(Path("src")))
-from hybrid import HybridDetector  # noqa: E402
+from hybrid import HybridDetector
 
 # -- Paths --------------------------------------------------------------------
 DATA_DIR    = Path("data/processed")
@@ -59,7 +59,7 @@ def eval_binary(y_true, y_pred_bin, label: str) -> dict:
         "recall":    round(float(recall_score(y_true, y_pred_bin, zero_division=0)), 4),
         "f1":        round(float(f1_score(y_true, y_pred_bin, zero_division=0)), 4),
         "fpr":       round(float(fpr(cm)), 4),
-        "n_rows":    int(len(y_true)),
+        "n_rows":    len(y_true),
         "n_alerts":  int(y_pred_bin.sum()),
     }
 
@@ -94,6 +94,7 @@ def main() -> None:
         pd.Categorical(results_test["rf_label"]).codes,
         zero_division=0,
     )
+    log.info("Test classification report:\n%s", report_test)
 
     # -------------------------------------------------------------------------
     # 2.  Withheld categories (unseen-category experiment)

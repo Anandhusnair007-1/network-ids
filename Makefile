@@ -4,7 +4,7 @@
 PYTHON := .venv/bin/python3
 PIP    := .venv/bin/python3 -m pip
 
-.PHONY: install audit preprocess train-rf train-iforest evaluate test dashboard all
+.PHONY: install audit preprocess train-rf train-iforest evaluate test lint verify-artifacts check quality-gate dashboard all
 
 ## Install dependencies into the virtual environment
 install:
@@ -30,14 +30,37 @@ train-iforest:
 evaluate:
 	$(PYTHON) src/evaluate_hybrid.py
 
-## Run unit tests
+## Verify SHA-256 cryptographic integrity of all saved model artifacts
+verify-artifacts:
+	$(PYTHON) src/security.py
+
+## Code style and linting gate
+lint:
+	$(PYTHON) -m ruff check --line-length 120 --select F,E,W --ignore E501 src/ dashboard/ tests/
+
+## Run automated test suite (unit, security, and integration tests)
 test:
-	.venv/bin/pytest tests/ -v
+	$(PYTHON) -m pytest tests/ -v
+
+## Automated Release Quality Gate: verify artifacts, lint, compile, dependencies, and test suite
+check: verify-artifacts lint
+	@echo "Checking Python bytecode compilation..."
+	$(PYTHON) -m compileall -q src dashboard tests
+	@echo "Checking pip dependency consistency..."
+	$(PIP) check
+	@echo "Executing full test suite..."
+	$(PYTHON) -m pytest tests/ -v
+	@echo "============================================================"
+	@echo "  ALL QUALITY GATES PASSED (Integrity, Lint, Deps, Tests)"
+	@echo "============================================================"
+
+quality-gate: check
 
 ## Launch the Streamlit dashboard
 dashboard:
-	.venv/bin/streamlit run dashboard/app.py
+	$(PYTHON) -m streamlit run dashboard/app.py
 
 ## Full pipeline: preprocess -> train RF -> train IF -> evaluate
 all: preprocess train-rf train-iforest evaluate
 	@echo "Full pipeline complete. Run 'make dashboard' to start the UI."
+

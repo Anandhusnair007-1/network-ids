@@ -136,8 +136,10 @@ def _encode_labels(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[int, str]]:
     df["label_code"] = le.fit_transform(df[LABEL_COL])
     df["is_attack"]  = (df[LABEL_COL] != "BENIGN").astype(int)
 
-    code_map: dict[int, str] = {int(c): str(l) for c, l in
-                                  zip(le.transform(le.classes_), le.classes_)}
+    code_map: dict[int, str] = {
+        int(code): str(label_name)
+        for code, label_name in zip(le.transform(le.classes_), le.classes_)
+    }
     log.info("Label distribution:\n%s", df[LABEL_COL].value_counts().to_string())
     return df, code_map
 

@@ -120,7 +120,7 @@ def main() -> None:
         "recall":     round(float(rec), 4),
         "f1":         round(float(f1), 4),
         "threshold":  round(float(best_thresh), 6),
-        "val_rows":   int(len(y_val)),
+        "val_rows":   len(y_val),
     }
 
     # -- Save artefacts -------------------------------------------------------

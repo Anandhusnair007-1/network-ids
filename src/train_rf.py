@@ -126,7 +126,7 @@ def main() -> None:
         "macro_recall":    round(float(macro_r), 4),
         "macro_f1":        round(float(macro_f1), 4),
         "false_positive_rate": round(float(fpr), 4),
-        "val_rows": int(len(y_val_mc)),
+        "val_rows": len(y_val_mc),
     }
     log.info("Eval metrics: %s", eval_metrics)
 

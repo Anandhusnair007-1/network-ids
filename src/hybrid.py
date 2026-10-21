@@ -30,21 +30,16 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
 
 import numpy as np
 import pandas as pd
 
 try:
     from config import (
-        ANOMALY_LABEL,
         BENIGN_LABEL,
         DATA_DIR,
         MANIFEST_PATH,
         MODELS_DIR,
-        SEVERITY_HIGH,
-        SEVERITY_INFO,
-        SEVERITY_MEDIUM,
         VERIFY_INTEGRITY,
     )
     from policy import BaselinePolicy, HybridDecisionPolicy
@@ -52,14 +47,10 @@ try:
     from validator import InputValidator
 except ImportError:
     from src.config import (
-        ANOMALY_LABEL,
         BENIGN_LABEL,
         DATA_DIR,
         MANIFEST_PATH,
         MODELS_DIR,
-        SEVERITY_HIGH,
-        SEVERITY_INFO,
-        SEVERITY_MEDIUM,
         VERIFY_INTEGRITY,
     )
     from src.policy import BaselinePolicy, HybridDecisionPolicy
@@ -133,7 +124,7 @@ class HybridDetector:
         manifest_path: Path = MANIFEST_PATH,
         verify_integrity: bool = VERIFY_INTEGRITY,
         policy: HybridDecisionPolicy | None = None,
-    ) -> "HybridDetector":
+    ) -> HybridDetector:
         """
         Securely load serialized models and configuration.
         Validates SHA-256 cryptographic hashes before any pickle deserialization.

@@ -7,11 +7,9 @@ Run with: pytest tests/
 
 from __future__ import annotations
 
-import json
-import pickle
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import numpy as np
 import pandas as pd
@@ -21,8 +19,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from alert_grouper import AlertGrouper, groups_to_dataframe
-from hybrid import HybridDetector, HybridResult
-
+from hybrid import HybridDetector
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 

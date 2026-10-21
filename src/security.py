@@ -12,10 +12,14 @@ import hmac
 import json
 import logging
 import pickle
+import sys
 from pathlib import Path
 from typing import Any
 
-from config import MANIFEST_PATH, VERIFY_INTEGRITY
+try:
+    from config import MANIFEST_PATH, VERIFY_INTEGRITY
+except ImportError:
+    from src.config import MANIFEST_PATH, VERIFY_INTEGRITY
 
 log = logging.getLogger(__name__)
 
@@ -128,3 +132,38 @@ def safe_load_pickle(
 
     with open(file_path, "rb") as f:
         return pickle.load(f)
+
+
+def verify_all_artifacts(
+    manifest_path: Path = MANIFEST_PATH,
+    base_dir: Path | None = None,
+) -> dict[str, str]:
+    """
+    Verify all artifacts registered in the manifest against disk contents.
+    Returns mapping of artifact_name -> verified sha256 hex digest.
+    Raises ArtifactIntegrityError or ArtifactNotFoundError on mismatch or missing file.
+    """
+    manifest = load_manifest(manifest_path)
+    if base_dir is None:
+        base_dir = manifest_path.parent
+
+    verified = {}
+    for name, meta in manifest["artifacts"].items():
+        file_path = base_dir / name
+        verify_artifact_integrity(file_path, expected_sha256=meta["sha256"], manifest_path=manifest_path)
+        verified[name] = meta["sha256"]
+    return verified
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+    print(f"🔒 Checking artifact integrity against manifest: {MANIFEST_PATH}")
+    try:
+        results = verify_all_artifacts()
+        for art_name, sha in results.items():
+            print(f"  ✅ {art_name:<24} SHA-256: {sha[:16]}... (VERIFIED)")
+        print(f"\n✨ All {len(results)} artifacts passed cryptographic integrity verification.")
+    except Exception as exc:
+        print(f"\n❌ INTEGRITY CHECK FAILED: {exc}")
+        sys.exit(1)
+
