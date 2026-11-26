@@ -1,9 +1,11 @@
+import sys
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-DATA_DIR = Path("data/raw/MachineLearningCVE")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config import RAW_DATA_DIR as DATA_DIR  # noqa: E402
 files = sorted(DATA_DIR.glob("*.csv"))
 
 if not files:
@@ -29,7 +31,9 @@ for path in files:
         for chunk in pd.read_csv(
             path,
             low_memory=False,
-            chunksize=50000
+            chunksize=50000,
+            encoding="cp1252",
+            encoding_errors="replace",
         ):
             chunk.columns = chunk.columns.str.strip()
             columns = chunk.columns.tolist()

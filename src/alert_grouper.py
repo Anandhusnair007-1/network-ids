@@ -6,7 +6,7 @@ Mitigates Security Operations Center (SOC) alert fatigue.
 
 Grouping strategies
 -------------------
-1. Timestamp-Based (Temporal Sliding Window):
+1. Timestamp-Based (Temporal Tumbling Window):
    - When a valid 'Timestamp' column is present, groups alerts by label + severity
      within a sliding time window (default: 60 seconds).
 2. Deterministic Bounded-Sequential (Index-Based):
@@ -22,6 +22,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import pandas as pd
+
+try:
+    from config import DST_IP_ALIASES, SRC_IP_ALIASES
+except ImportError:  # imported as part of the ``src`` package
+    from src.config import DST_IP_ALIASES, SRC_IP_ALIASES
 
 MIN_ALERTS = 5        # Minimum flows to emit an alert group
 WINDOW_SIZE = 60      # Seconds for timestamp sliding window
@@ -39,6 +44,8 @@ class AlertGroup:
     avg_anomaly_score: float
     window_start:      object   # int index or pd.Timestamp
     window_end:        object
+    src_ip:            str | None = None   # only when the input carried a source-IP column
+    dst_ip:            str | None = None
 
 
 class AlertGrouper:
@@ -73,6 +80,26 @@ class AlertGrouper:
         self.max_index_gap  = max_index_gap
         self.max_group_size = max_group_size
         self.include_benign = include_benign
+
+    @staticmethod
+    def _entity_columns(df: pd.DataFrame) -> tuple[str | None, str | None]:
+        """Detect source/destination IP columns (CIC-IDS2017 headers or common aliases)."""
+        src = next((c for c in SRC_IP_ALIASES if c in df.columns), None)
+        dst = next((c for c in DST_IP_ALIASES if c in df.columns), None)
+        return src, dst
+
+    def _group_keys(self, df: pd.DataFrame) -> list[str]:
+        src, dst = self._entity_columns(df)
+        return ["final_label", "severity"] + [c for c in (src, dst) if c]
+
+    @staticmethod
+    def _split_key(df_cols_src_dst, key) -> tuple[str, str, str | None, str | None]:
+        label, sev, *rest = key if isinstance(key, tuple) else (key,)
+        src_col, dst_col = df_cols_src_dst
+        it = iter(rest)
+        src = str(next(it)) if src_col else None
+        dst = str(next(it)) if dst_col else None
+        return str(label), str(sev), src, dst
 
     def group(self, df: pd.DataFrame) -> list[AlertGroup]:
         """
@@ -125,8 +152,10 @@ class AlertGrouper:
         groups: list[AlertGroup] = []
         gid = 0
 
-        # Group by (final_label, severity)
-        for (label, sev), sub in df.groupby(["final_label", "severity"], sort=False):
+        # Group by (final_label, severity[, src_ip, dst_ip])
+        entity = self._entity_columns(df)
+        for key, sub in df.groupby(self._group_keys(df), sort=False):
+            label, sev, src_ip, dst_ip = self._split_key(entity, key)
             if len(sub) < self.min_alerts:
                 continue
 
@@ -154,6 +183,8 @@ class AlertGrouper:
                             avg_anomaly_score=float(c_scores.mean()),
                             window_start=int(indices[cluster_start_idx]),
                             window_end=int(indices[i - 1]),
+                            src_ip=src_ip,
+                            dst_ip=dst_ip,
                         ))
                         gid += 1
                     cluster_start_idx = i
@@ -172,6 +203,8 @@ class AlertGrouper:
                     avg_anomaly_score=float(c_scores.mean()),
                     window_start=int(indices[cluster_start_idx]),
                     window_end=int(indices[-1]),
+                    src_ip=src_ip,
+                    dst_ip=dst_ip,
                 ))
                 gid += 1
 
@@ -180,7 +213,7 @@ class AlertGrouper:
     # ------------------------------------------------------------------
     def _window_group(self, df: pd.DataFrame) -> list[AlertGroup]:
         """
-        Sliding-window grouper when a valid Timestamp column is available.
+        Fixed-width (tumbling) window grouper when a valid Timestamp column is available.
         """
         out: list[AlertGroup] = []
         gid = 0
@@ -199,7 +232,9 @@ class AlertGrouper:
             window_df = valid_df[mask]
 
             if not window_df.empty:
-                for (label, sev), sub in window_df.groupby(["final_label", "severity"], sort=False):
+                entity = self._entity_columns(window_df)
+                for key, sub in window_df.groupby(self._group_keys(window_df), sort=False):
+                    label, sev, src_ip, dst_ip = self._split_key(entity, key)
                     if len(sub) < self.min_alerts:
                         continue
                     out.append(AlertGroup(
@@ -211,6 +246,8 @@ class AlertGrouper:
                         avg_anomaly_score=float(sub["anomaly_score"].mean()),
                         window_start=current,
                         window_end=end,
+                        src_ip=src_ip,
+                        dst_ip=dst_ip,
                     ))
                     gid += 1
             current = end
@@ -220,13 +257,15 @@ class AlertGrouper:
 
 def groups_to_dataframe(groups: list[AlertGroup]) -> pd.DataFrame:
     """Convert a list of AlertGroup objects to an analytical DataFrame."""
+    base_cols = [
+        "group_id", "label", "severity", "count",
+        "avg_confidence", "avg_anomaly_score", "window_start", "window_end",
+    ]
     if not groups:
-        return pd.DataFrame(columns=[
-            "group_id", "label", "severity", "count",
-            "avg_confidence", "avg_anomaly_score", "window_start", "window_end",
-        ])
-    return pd.DataFrame([
-        {
+        return pd.DataFrame(columns=base_cols)
+    rows = []
+    for g in groups:
+        row = {
             "group_id":          g.group_id,
             "label":             g.label,
             "severity":          g.severity,
@@ -236,5 +275,31 @@ def groups_to_dataframe(groups: list[AlertGroup]) -> pd.DataFrame:
             "window_start":      g.window_start,
             "window_end":        g.window_end,
         }
-        for g in groups
-    ])
+        if g.src_ip is not None or g.dst_ip is not None:
+            row["src_ip"] = g.src_ip
+            row["dst_ip"] = g.dst_ip
+        rows.append(row)
+    return pd.DataFrame(rows)
+
+
+def summarize_groups(groups: list[AlertGroup], n_alerts: int) -> dict[str, float]:
+    """
+    Honest triage KPIs.
+
+    ``n_alerts`` is the number of raw (non-INFO) alerts that were offered to the grouper.
+    Alerts that did not reach ``min_alerts`` are *not* compressed - they stay individual
+    alerts - so they are reported separately instead of being counted as saved work.
+    """
+    incidents = len(groups)
+    covered = int(sum(g.count for g in groups))
+    ungrouped = max(n_alerts - covered, 0)
+    queue_after = incidents + ungrouped
+    reduction = (1 - queue_after / n_alerts) if n_alerts else 0.0
+    return {
+        "raw_alerts": int(n_alerts),
+        "incidents": incidents,
+        "alerts_in_incidents": covered,
+        "ungrouped_alerts": ungrouped,
+        "analyst_queue": queue_after,
+        "queue_reduction": float(reduction),
+    }

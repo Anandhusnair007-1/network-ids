@@ -1,0 +1,20 @@
+[server]
+maxUploadSize = 50          # MB - mirrors IDS_MAX_UPLOAD_BYTES
+enableXsrfProtection = true
+headless = true
+
+[browser]
+gatherUsageStats = false    # no telemetry from a security console
+
+[theme]
+base = "dark"
+primaryColor = "#3FB6A8"
+backgroundColor = "#0F1826"
+secondaryBackgroundColor = "#162236"
+textColor = "#E6ECF5"
+borderColor = "#2A3A55"
+font = "sans-serif"
+baseRadius = "6px"
+
+[client]
+toolbarMode = "viewer"      # hides Deploy; this console is not meant to be published

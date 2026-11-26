@@ -17,6 +17,7 @@ from __future__ import annotations
 import json
 import logging
 import pickle
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -32,8 +33,9 @@ from sklearn.metrics import (
 from sklearn.preprocessing import StandardScaler
 
 # -- Paths --------------------------------------------------------------------
-DATA_DIR   = Path("data/processed")
-MODELS_DIR = Path("models")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config import DATA_DIR, MODELS_DIR  # noqa: E402
+
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 # -- Logging ------------------------------------------------------------------

@@ -13,13 +13,14 @@ import json
 import logging
 import pickle
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 try:
-    from config import MANIFEST_PATH, VERIFY_INTEGRITY
+    from config import MANIFEST_PATH, MANIFEST_PUBKEY, VERIFY_INTEGRITY
 except ImportError:
-    from src.config import MANIFEST_PATH, VERIFY_INTEGRITY
+    from src.config import MANIFEST_PATH, MANIFEST_PUBKEY, VERIFY_INTEGRITY
 
 log = logging.getLogger(__name__)
 
@@ -60,6 +61,16 @@ def load_manifest(manifest_path: Path = MANIFEST_PATH) -> dict[str, Any]:
     """
     if not manifest_path.exists():
         raise ManifestError(f"Integrity manifest not found at: {manifest_path}")
+
+    if MANIFEST_PUBKEY:  # signed-manifest mode: refuse an unsigned or re-signed manifest
+        try:
+            from signing import SignatureError, verify_manifest_signature
+        except ImportError:
+            from src.signing import SignatureError, verify_manifest_signature
+        try:
+            verify_manifest_signature(Path(MANIFEST_PUBKEY), manifest_path)
+        except SignatureError as exc:
+            raise ManifestError(f"Manifest signature check failed: {exc}") from exc
 
     try:
         with open(manifest_path, "r", encoding="utf-8") as f:
@@ -131,7 +142,7 @@ def safe_load_pickle(
         verify_artifact_integrity(file_path, manifest_path=manifest_path)
 
     with open(file_path, "rb") as f:
-        return pickle.load(f)
+        return pickle.load(f)  # nosec B301 - hash (and optional signature) verified above
 
 
 def verify_all_artifacts(
@@ -155,15 +166,64 @@ def verify_all_artifacts(
     return verified
 
 
+_ARTIFACT_TYPES = {
+    "rf_model.pkl": "RandomForestClassifier",
+    "rf_scaler.pkl": "StandardScaler",
+    "iforest_model.pkl": "IsolationForest",
+    "iforest_threshold.json": "ThresholdConfig",
+}
+
+
+def write_manifest(
+    manifest_path: Path = MANIFEST_PATH,
+    base_dir: Path | None = None,
+    artifact_types: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    """
+    (Re)generate the SHA-256 manifest from the artifacts currently on disk.
+
+    Run this deliberately, once, right after training. It records whatever is on disk as
+    trusted, so it must never be wired into application start-up.
+    """
+    base_dir = base_dir or manifest_path.parent
+    types = artifact_types or _ARTIFACT_TYPES
+    artifacts: dict[str, Any] = {}
+    for name, kind in types.items():
+        path = base_dir / name
+        if not path.exists():
+            raise ArtifactNotFoundError(f"Cannot register missing artifact: {path}")
+        artifacts[name] = {
+            "sha256": compute_file_sha256(path),
+            "size_bytes": path.stat().st_size,
+            "type": kind,
+        }
+    manifest = {
+        "version": "1.0.0",
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "description": "Cryptographic SHA-256 integrity manifest for Network IDS model artifacts",
+        "artifacts": artifacts,
+    }
+    tmp = manifest_path.with_suffix(".json.tmp")
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, indent=2)
+        f.write("\n")
+    tmp.replace(manifest_path)
+    return manifest
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-    print(f"🔒 Checking artifact integrity against manifest: {MANIFEST_PATH}")
+    if "--update" in sys.argv[1:]:
+        m = write_manifest()
+        print(f"Manifest regenerated at {MANIFEST_PATH} for {len(m['artifacts'])} artifacts "
+              f"({m['generated_at']}).")
+        sys.exit(0)
+    print(f"Checking artifact integrity against manifest: {MANIFEST_PATH}")
     try:
         results = verify_all_artifacts()
         for art_name, sha in results.items():
-            print(f"  ✅ {art_name:<24} SHA-256: {sha[:16]}... (VERIFIED)")
-        print(f"\n✨ All {len(results)} artifacts passed cryptographic integrity verification.")
+            print(f"  OK  {art_name:<24} SHA-256: {sha[:16]}... (VERIFIED)")
+        print(f"\nAll {len(results)} artifacts passed cryptographic integrity verification.")
     except Exception as exc:
-        print(f"\n❌ INTEGRITY CHECK FAILED: {exc}")
+        print(f"\nINTEGRITY CHECK FAILED: {exc}")
         sys.exit(1)
-

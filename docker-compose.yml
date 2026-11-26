@@ -1,0 +1,53 @@
+# docker compose up -d   (copy .env.example to .env and set real secrets first)
+services:
+  api:
+    build: .
+    env_file: .env
+    ports: ["127.0.0.1:8000:8000"]
+    volumes:
+      - ./models:/app/models:ro
+      - ./data/processed:/app/data/processed:ro
+      - ids-var:/app/var
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+
+  dashboard:
+    build: .
+    command: ["streamlit", "run", "dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0",
+              "--server.headless=true"]
+    env_file: .env
+    ports: ["127.0.0.1:8501:8501"]
+    volumes:
+      - ./models:/app/models:ro
+      - ./data/processed:/app/data/processed:ro
+      - ./reports:/app/reports:ro
+      - ids-var:/app/var
+    read_only: true
+    tmpfs: [/tmp, /app/.streamlit/cache]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health')"]
+      interval: 30s
+    restart: unless-stopped
+
+  ingest:
+    build: .
+    command: ["python", "src/ingest_dir.py"]
+    env_file: .env
+    volumes:
+      - ./models:/app/models:ro
+      - ./data/processed:/app/data/processed:ro
+      - ids-var:/app/var
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    profiles: ["ingest"]
+
+volumes:
+  ids-var:

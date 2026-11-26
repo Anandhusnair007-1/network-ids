@@ -33,3 +33,13 @@ Thumbs.db
 
 # Logs and runtime artifacts
 *.log
+
+# Personal / signed documents must never be committed
+/Anandhu_IDS_Proposal_Signed*.pdf
+
+# Production runtime state and secrets
+/var/
+/keys/
+.env
+*.pem
+*.key

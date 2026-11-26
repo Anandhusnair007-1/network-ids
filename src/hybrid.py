@@ -158,43 +158,79 @@ class HybridDetector:
         return cls(rf, iforest, scaler, label_map, threshold, policy=policy)
 
     # ------------------------------------------------------------------
+    def with_policy(self, policy: HybridDecisionPolicy) -> HybridDetector:
+        """
+        Return a detector that shares the already-loaded models but uses another policy.
+
+        Loading (and SHA-256 verifying) the 80 MB forest is the expensive part; switching
+        arbitration policy is free, so UIs should call this instead of ``load`` again.
+        """
+        return HybridDetector(
+            self.rf, self.iforest, self.scaler, self.label_map, self.threshold, policy=policy
+        )
+
+    # ------------------------------------------------------------------
+    def signals(self, X_scaled: np.ndarray) -> dict[str, np.ndarray]:
+        """
+        Raw model outputs for an already-scaled matrix, before any policy is applied.
+
+        The forest is evaluated a single time (``predict_proba``); the winning class is the
+        arg-max over ``classes_``, which is exactly what ``predict`` returns but costs half
+        as much on 200 unpruned trees. Exposed so evaluation code can score several policies
+        without re-running the models.
+        """
+        rf_proba = self.rf.predict_proba(X_scaled)
+        classes = getattr(self.rf, "classes_", None)
+        if isinstance(classes, np.ndarray) and classes.shape[0] == rf_proba.shape[1]:
+            rf_codes = classes[rf_proba.argmax(axis=1)]
+        else:  # estimator without a usable classes_ (e.g. test doubles)
+            rf_codes = self.rf.predict(X_scaled)
+        return {
+            "rf_codes": rf_codes,
+            "rf_labels": self._label_lookup[rf_codes],
+            "rf_confs": rf_proba.max(axis=1),
+            "if_scores": self.iforest.decision_function(X_scaled),
+        }
+
+    # ------------------------------------------------------------------
+    def apply_policy(self, sig: dict[str, np.ndarray]) -> tuple[np.ndarray, np.ndarray]:
+        """Apply the active policy to previously computed ``signals`` -> (final_labels, severities)."""
+        final_labels, severities, _, _ = self.policy.evaluate(
+            rf_codes=sig["rf_codes"],
+            rf_confs=sig["rf_confs"],
+            rf_labels=sig["rf_labels"],
+            if_scores=sig["if_scores"],
+            base_threshold=self.threshold,
+            benign_code=self._benign_code,
+        )
+        return final_labels, severities
+
+    # ------------------------------------------------------------------
+    def _infer(self, X_scaled: np.ndarray) -> dict[str, np.ndarray]:
+        """Run both models once over an already-scaled matrix and apply the active policy."""
+        sig = self.signals(X_scaled)
+        final_labels, severities = self.apply_policy(sig)
+        return {
+            **sig,
+            "if_flags": sig["if_scores"] < self.threshold,
+            "final_labels": final_labels,
+            "severities": severities,
+        }
+
+    # ------------------------------------------------------------------
     def predict(self, X_raw: np.ndarray) -> list[HybridResult]:
         """
         Vectorized prediction returning a list of HybridResult objects.
 
         Parameters
         ----------
-        X_raw : np.ndarray of shape (n_samples, n_features) – UNSCALED.
-
-        Returns
-        -------
-        List of HybridResult, one per row.
+        X_raw : np.ndarray of shape (n_samples, n_features) - UNSCALED.
         """
         if len(X_raw) == 0:
             return []
 
-        X = self.scaler.transform(X_raw)
-
-        # Model inferences
-        rf_codes   = self.rf.predict(X)
-        rf_proba   = self.rf.predict_proba(X)
-        rf_confs   = rf_proba.max(axis=1)
-        if_scores  = self.iforest.decision_function(X)
-        if_flags   = if_scores < self.threshold
-
-        rf_labels = self._label_lookup[rf_codes]
-
-        # Vectorized policy evaluation
-        final_labels, severities, _, _ = self.policy.evaluate(
-            rf_codes=rf_codes,
-            rf_confs=rf_confs,
-            rf_labels=rf_labels,
-            if_scores=if_scores,
-            base_threshold=self.threshold,
-            benign_code=self._benign_code,
-        )
-
-        results: list[HybridResult] = [
+        out = self._infer(self.scaler.transform(X_raw))
+        return [
             HybridResult(
                 rf_label=str(lbl),
                 rf_confidence=float(conf),
@@ -204,11 +240,10 @@ class HybridDetector:
                 severity=str(sev),
             )
             for lbl, conf, anom, score, flbl, sev in zip(
-                rf_labels, rf_confs, if_flags, if_scores, final_labels, severities
+                out["rf_labels"], out["rf_confs"], out["if_flags"],
+                out["if_scores"], out["final_labels"], out["severities"],
             )
         ]
-
-        return results
 
     # ------------------------------------------------------------------
     def predict_df(
@@ -217,9 +252,17 @@ class HybridDetector:
         feature_cols: list[str],
         validate: bool = True,
         fill_missing: bool = False,
+        max_rows: int | None = None,
     ) -> pd.DataFrame:
         """
-        High-throughput vectorized inference wrapper that directly enriches the DataFrame.
+        High-throughput vectorized inference that enriches ``df`` with prediction columns.
+
+        Every column of ``df`` (Label, Timestamp, IPs, ...) is preserved in the output;
+        only ``feature_cols`` are read by the models. With ``validate=True`` a sanitized copy
+        of the features is used for inference but the caller's other columns are kept.
+
+        ``max_rows`` overrides the upload-DoS ceiling (default ``IDS_MAX_UPLOAD_ROWS``) for trusted
+        offline batches such as the 500k-row evaluation split; untrusted input should leave it unset.
         """
         if df.empty:
             out = df.copy()
@@ -232,37 +275,19 @@ class HybridDetector:
                 feature_cols=feature_cols,
                 fill_missing=fill_missing,
                 allow_extra_columns=True,
+                **({"max_rows": max_rows} if max_rows is not None else {}),
             )
-            df_features = validator.validate_df(df)
-            X = df_features[feature_cols].to_numpy(dtype=np.float32)
+            X = validator.validate_df(df)[feature_cols].to_numpy(dtype=np.float32)
         else:
             X = df[feature_cols].to_numpy(dtype=np.float32)
 
-        X_scaled = self.scaler.transform(X)
-
-        rf_codes   = self.rf.predict(X_scaled)
-        rf_proba   = self.rf.predict_proba(X_scaled)
-        rf_confs   = rf_proba.max(axis=1)
-        if_scores  = self.iforest.decision_function(X_scaled)
-        if_flags   = if_scores < self.threshold
-
-        rf_labels = self._label_lookup[rf_codes]
-
-        # Vectorized policy evaluation
-        final_labels, severities, _, _ = self.policy.evaluate(
-            rf_codes=rf_codes,
-            rf_confs=rf_confs,
-            rf_labels=rf_labels,
-            if_scores=if_scores,
-            base_threshold=self.threshold,
-            benign_code=self._benign_code,
-        )
+        res = self._infer(self.scaler.transform(X))
 
         out = df.copy()
-        out["rf_label"]       = rf_labels
-        out["rf_confidence"]  = rf_confs
-        out["is_anomaly"]     = if_flags
-        out["anomaly_score"]  = if_scores
-        out["final_label"]    = final_labels
-        out["severity"]       = severities
+        out["rf_label"]       = res["rf_labels"]
+        out["rf_confidence"]  = res["rf_confs"]
+        out["is_anomaly"]     = res["if_flags"]
+        out["anomaly_score"]  = res["if_scores"]
+        out["final_label"]    = res["final_labels"]
+        out["severity"]       = res["severities"]
         return out

@@ -13,7 +13,10 @@ from collections.abc import Sequence
 import numpy as np
 import pandas as pd
 
-from config import MAX_UPLOAD_ROWS
+try:
+    from config import MAX_UPLOAD_ROWS
+except ImportError:  # imported as part of the ``src`` package
+    from src.config import MAX_UPLOAD_ROWS
 
 log = logging.getLogger(__name__)
 

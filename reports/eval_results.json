@@ -31,23 +31,226 @@
       "Web Attack \ufffd Brute Force": {
         "total": 1470,
         "rf_detected": 69,
-        "if_detected": 74
+        "if_detected": 74,
+        "hybrid_detected": 143
       },
       "Web Attack \ufffd XSS": {
         "total": 652,
         "rf_detected": 21,
-        "if_detected": 18
+        "if_detected": 18,
+        "hybrid_detected": 39
       },
       "Infiltration": {
         "total": 36,
         "rf_detected": 0,
-        "if_detected": 31
+        "if_detected": 31,
+        "hybrid_detected": 31
       },
       "Web Attack \ufffd Sql Injection": {
         "total": 21,
         "rf_detected": 4,
-        "if_detected": 0
+        "if_detected": 0,
+        "hybrid_detected": 4
       }
     }
-  }
+  },
+  "policy_comparison": {
+    "tiered": {
+      "label": "Tiered Severity (SOC recommended)",
+      "short": "Tiered",
+      "summary": "Known attacks HIGH, deep anomalies MEDIUM, marginal anomalies LOW (hunting queue).",
+      "all_alerts": {
+        "precision": 0.6821,
+        "recall": 0.9995,
+        "fpr": 0.0942,
+        "n_alerts": 124172
+      },
+      "actionable": {
+        "precision": 0.863,
+        "recall": 0.9994,
+        "fpr": 0.0321,
+        "n_alerts": 98130
+      },
+      "severity_counts_test": {
+        "HIGH": 85762,
+        "MEDIUM": 12368,
+        "LOW": 26042,
+        "INFO": 379865
+      },
+      "withheld": {
+        "overall_all_alerts": 0.0996,
+        "overall_actionable": 0.0941,
+        "per_label": {
+          "Infiltration": {
+            "total": 36,
+            "all_alerts": 0.8611,
+            "actionable": 0.6667
+          },
+          "Web Attack \ufffd Brute Force": {
+            "total": 1470,
+            "all_alerts": 0.0973,
+            "actionable": 0.0952
+          },
+          "Web Attack \ufffd Sql Injection": {
+            "total": 21,
+            "all_alerts": 0.1905,
+            "actionable": 0.1905
+          },
+          "Web Attack \ufffd XSS": {
+            "total": 652,
+            "all_alerts": 0.0598,
+            "actionable": 0.0567
+          }
+        }
+      }
+    },
+    "baseline": {
+      "label": "Baseline (max recall)",
+      "short": "Baseline",
+      "summary": "Any anomaly below the validation-tuned threshold is MEDIUM. Highest recall, noisiest.",
+      "all_alerts": {
+        "precision": 0.6821,
+        "recall": 0.9995,
+        "fpr": 0.0942,
+        "n_alerts": 124172
+      },
+      "actionable": {
+        "precision": 0.6821,
+        "recall": 0.9995,
+        "fpr": 0.0942,
+        "n_alerts": 124172
+      },
+      "severity_counts_test": {
+        "HIGH": 85762,
+        "MEDIUM": 38410,
+        "LOW": 0,
+        "INFO": 379865
+      },
+      "withheld": {
+        "overall_all_alerts": 0.0996,
+        "overall_actionable": 0.0996,
+        "per_label": {
+          "Infiltration": {
+            "total": 36,
+            "all_alerts": 0.8611,
+            "actionable": 0.8611
+          },
+          "Web Attack \ufffd Brute Force": {
+            "total": 1470,
+            "all_alerts": 0.0973,
+            "actionable": 0.0973
+          },
+          "Web Attack \ufffd Sql Injection": {
+            "total": 21,
+            "all_alerts": 0.1905,
+            "actionable": 0.1905
+          },
+          "Web Attack \ufffd XSS": {
+            "total": 652,
+            "all_alerts": 0.0598,
+            "actionable": 0.0598
+          }
+        }
+      }
+    },
+    "balanced": {
+      "label": "Balanced (t = 0.0)",
+      "short": "Balanced",
+      "summary": "Anomaly threshold moved to 0.0 to cut false alarms at some cost to novel-threat recall.",
+      "all_alerts": {
+        "precision": 0.7957,
+        "recall": 0.9994,
+        "fpr": 0.0519,
+        "n_alerts": 106433
+      },
+      "actionable": {
+        "precision": 0.7957,
+        "recall": 0.9994,
+        "fpr": 0.0519,
+        "n_alerts": 106433
+      },
+      "severity_counts_test": {
+        "HIGH": 85762,
+        "MEDIUM": 20671,
+        "LOW": 0,
+        "INFO": 397604
+      },
+      "withheld": {
+        "overall_all_alerts": 0.0964,
+        "overall_actionable": 0.0964,
+        "per_label": {
+          "Infiltration": {
+            "total": 36,
+            "all_alerts": 0.7778,
+            "actionable": 0.7778
+          },
+          "Web Attack \ufffd Brute Force": {
+            "total": 1470,
+            "all_alerts": 0.0959,
+            "actionable": 0.0959
+          },
+          "Web Attack \ufffd Sql Injection": {
+            "total": 21,
+            "all_alerts": 0.1905,
+            "actionable": 0.1905
+          },
+          "Web Attack \ufffd XSS": {
+            "total": 652,
+            "all_alerts": 0.0567,
+            "actionable": 0.0567
+          }
+        }
+      }
+    },
+    "confidence_gated": {
+      "label": "Confidence-gated (experimental)",
+      "short": "Gated",
+      "summary": "Suppresses marginal anomalies when the forest is >99.9% sure the flow is benign.",
+      "all_alerts": {
+        "precision": 0.8602,
+        "recall": 0.9995,
+        "fpr": 0.0328,
+        "n_alerts": 98459
+      },
+      "actionable": {
+        "precision": 0.8602,
+        "recall": 0.9995,
+        "fpr": 0.0328,
+        "n_alerts": 98459
+      },
+      "severity_counts_test": {
+        "HIGH": 85762,
+        "MEDIUM": 12697,
+        "LOW": 0,
+        "INFO": 405578
+      },
+      "withheld": {
+        "overall_all_alerts": 0.0996,
+        "overall_actionable": 0.0996,
+        "per_label": {
+          "Infiltration": {
+            "total": 36,
+            "all_alerts": 0.8611,
+            "actionable": 0.8611
+          },
+          "Web Attack \ufffd Brute Force": {
+            "total": 1470,
+            "all_alerts": 0.0973,
+            "actionable": 0.0973
+          },
+          "Web Attack \ufffd Sql Injection": {
+            "total": 21,
+            "all_alerts": 0.1905,
+            "actionable": 0.1905
+          },
+          "Web Attack \ufffd XSS": {
+            "total": 652,
+            "all_alerts": 0.0598,
+            "actionable": 0.0598
+          }
+        }
+      }
+    }
+  },
+  "if_threshold": 0.06110182785930004
 }
