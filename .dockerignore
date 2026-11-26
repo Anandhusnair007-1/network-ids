@@ -1,0 +1,13 @@
+.git
+.venv
+__pycache__
+*.pyc
+data/raw
+data/processed
+models
+var
+keys
+.env
+tests
+reports
+*.pdf

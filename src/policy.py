@@ -9,8 +9,6 @@ and confidence-gated anomaly filtering.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Sequence
 
 import numpy as np
 
@@ -205,3 +203,45 @@ class ConfidenceGatedPolicy(HybridDecisionPolicy):
         severities = np.where(is_attack, SEVERITY_HIGH, np.where(is_anomaly, SEVERITY_MEDIUM, SEVERITY_INFO))
 
         return final_labels, severities, is_attack, is_anomaly
+
+
+# ---------------------------------------------------------------------------
+# Policy registry (single source of truth for CLI, evaluation and dashboard)
+# ---------------------------------------------------------------------------
+DEEP_ANOMALY_THRESHOLD = -0.03
+
+POLICY_INFO: dict[str, dict[str, str]] = {
+    "tiered": {
+        "label": "Tiered (recommended)",
+        "short": "Tiered",
+        "summary": "Known attacks HIGH, deep anomalies MEDIUM, marginal anomalies LOW (hunting queue).",
+    },
+    "baseline": {
+        "label": "Baseline (max recall)",
+        "short": "Baseline",
+        "summary": "Any anomaly below the validation-tuned threshold is MEDIUM. Highest recall, noisiest.",
+    },
+    "balanced": {
+        "label": "Balanced (t = 0)",
+        "short": "Balanced",
+        "summary": "Anomaly threshold moved to 0.0 to cut false alarms at some cost to novel-threat recall.",
+    },
+    "confidence_gated": {
+        "label": "Confidence-gated (beta)",
+        "short": "Gated",
+        "summary": "Suppresses marginal anomalies when the forest is >99.9% sure the flow is benign.",
+    },
+}
+
+
+def build_policy(name: str, base_threshold: float) -> HybridDecisionPolicy:
+    """Instantiate a policy by registry key. ``base_threshold`` is the detector's tuned IF threshold."""
+    if name == "tiered":
+        return TieredSeverityPolicy(DEEP_ANOMALY_THRESHOLD, base_threshold)
+    if name == "baseline":
+        return BaselinePolicy()
+    if name == "balanced":
+        return CalibratedThresholdPolicy(target_threshold=0.0)
+    if name == "confidence_gated":
+        return ConfidenceGatedPolicy(anomaly_threshold=base_threshold)
+    raise KeyError(f"Unknown policy '{name}'. Valid: {sorted(POLICY_INFO)}")

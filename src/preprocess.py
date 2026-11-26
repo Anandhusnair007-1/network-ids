@@ -9,10 +9,10 @@ Steps
 2.  Drop infinities, fill remaining NaNs with 0.
 3.  Remove exact-duplicate rows.
 4.  Map labels -> integer codes; keep a separate binary column (0=BENIGN, 1=ATTACK).
-5.  WITHHELD CATEGORIES: two attack families are removed from the
-    supervised training split and saved separately for the held-out
-    anomaly experiment (Week 6).
-6.  Stratified 60/20/20 train/val/test split (known attacks only).
+5.  WITHHELD CATEGORIES: four attack labels (Infiltration + the three Web Attack
+    variants) are removed from the supervised training split and saved separately
+    for the held-out anomaly experiment.
+6.  Stratified 60/20/20 train/val/test split (known categories only).
 7.  Save artefacts to data/processed/.
 
 Withheld categories (unseen-category experiment)
@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -35,9 +36,11 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-# -- Paths --------------------------------------------------------------------
-RAW_DIR  = Path("data/raw/MachineLearningCVE")
-OUT_DIR  = Path("data/processed")
+# -- Paths (honour the IDS_* environment overrides in src/config.py) ---------
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config import DATA_DIR as OUT_DIR  # noqa: E402
+from config import RAW_DATA_DIR as RAW_DIR  # noqa: E402
+
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # -- Logging ------------------------------------------------------------------
@@ -53,8 +56,8 @@ LABEL_COL = "Label"
 RANDOM_STATE = 42
 
 # Attack categories withheld from supervised training (unseen-category experiment).
-# The CSV en-dash (U+2013) is decoded as the UTF-8 replacement character (U+FFFD),
-# so we match by prefix/substring rather than exact string.
+# Raw CSVs are cp1252 (the en-dash is byte 0x96); we decode them as such, but still match
+# by prefix so the stored legacy labels containing U+FFFD keep working.
 WITHHELD_PREFIXES: tuple[str, ...] = (
     "Infiltration",
     "Web Attack",   # catches Brute Force, XSS, Sql Injection variants
@@ -89,7 +92,8 @@ def _load_all_csvs() -> pd.DataFrame:
     for path in files:
         log.info("  Loading %s (%.1f MB) ...", path.name, path.stat().st_size / 1e6)
         chunks: list[pd.DataFrame] = []
-        for chunk in pd.read_csv(path, low_memory=False, chunksize=CHUNKSIZE):
+        for chunk in pd.read_csv(path, low_memory=False, chunksize=CHUNKSIZE,
+                                encoding="cp1252", encoding_errors="replace"):
             chunk.columns = chunk.columns.str.strip()
             chunks.append(chunk)
         frames.append(pd.concat(chunks, ignore_index=True))
@@ -136,8 +140,10 @@ def _encode_labels(df: pd.DataFrame) -> tuple[pd.DataFrame, dict[int, str]]:
     df["label_code"] = le.fit_transform(df[LABEL_COL])
     df["is_attack"]  = (df[LABEL_COL] != "BENIGN").astype(int)
 
-    code_map: dict[int, str] = {int(c): str(l) for c, l in
-                                  zip(le.transform(le.classes_), le.classes_)}
+    code_map: dict[int, str] = {
+        int(code): str(label_name)
+        for code, label_name in zip(le.transform(le.classes_), le.classes_)
+    }
     log.info("Label distribution:\n%s", df[LABEL_COL].value_counts().to_string())
     return df, code_map
 

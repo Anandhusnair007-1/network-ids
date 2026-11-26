@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 import logging
 import pickle
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -31,8 +32,9 @@ from sklearn.metrics import (
 )
 
 # -- Paths --------------------------------------------------------------------
-DATA_DIR   = Path("data/processed")
-MODELS_DIR = Path("models")
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from config import DATA_DIR, MODELS_DIR  # noqa: E402
+
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 # -- Logging ------------------------------------------------------------------
@@ -49,7 +51,7 @@ CONTAMINATION = 0.05   # conservative: ~5% of training rows expected anomalous
 
 def load_scaler():
     with open(MODELS_DIR / "rf_scaler.pkl", "rb") as f:
-        return pickle.load(f)
+        return pickle.load(f)  # nosec B301
 
 
 def load_features() -> list[str]:
@@ -120,7 +122,7 @@ def main() -> None:
         "recall":     round(float(rec), 4),
         "f1":         round(float(f1), 4),
         "threshold":  round(float(best_thresh), 6),
-        "val_rows":   int(len(y_val)),
+        "val_rows":   len(y_val),
     }
 
     # -- Save artefacts -------------------------------------------------------
