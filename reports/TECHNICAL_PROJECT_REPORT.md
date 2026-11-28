@@ -226,6 +226,25 @@ The remaining 2,520,183 known-category flows were partitioned via stratified spl
 ### 11.5 Alert Grouping & Fatigue Mitigation
 * **Note:** the figures in this section were measured before `summarize_groups()` was corrected to keep ungrouped alerts in the analyst queue, and the original 99.56% compression is therefore not reproducible. The current method yields 8% on a 2,000-flow upload with random IPs and 2-second spacing, and 95% on a shuffled sample with batch-wide grouping (see `README.md`). Reduction depends on traffic.
 
+### 11.6 API Load Test (`POST /v1/score`)
+
+Measured on the development host (AMD Ryzen 7 6800H, Python 3.12.16) against a single uvicorn worker running `api.main:app` directly, not in Docker. Each row ran for 15 s with `persist=false` and real `test.parquet` flows (seed 42), over loopback. All 1,744 requests returned HTTP 200; there were no errors or timeouts.
+
+| Batch (flows) | Concurrency | Req/s | Flows/s | p50 | p95 | p99 |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| 1 | 1 | 24.2 | 24 | 41 ms | 44 ms | 46 ms |
+| 1 | 8 | 27.1 | 27 | 295 ms | 362 ms | 393 ms |
+| 100 | 1 | 20.2 | 2,023 | 46 ms | 58 ms | 60 ms |
+| 100 | 8 | 18.1 | 1,810 | 441 ms | 509 ms | 543 ms |
+| 1,000 | 1 | 8.8 | 8,769 | 114 ms | 118 ms | 123 ms |
+| 1,000 | 4 | 8.7 | 8,654 | 464 ms | 527 ms | 560 ms |
+| 1,000 | 16 | 7.7 | 7,684 | 2,071 ms | 2,307 ms | 2,378 ms |
+
+* Throughput does not rise with concurrency; latency grows roughly in proportion to it, so one worker effectively serves one scoring request at a time. Scale with more workers or replicas.
+* End-to-end API throughput (about 8,800 flows/s at best) is far below the in-process figure in 11.4 (about 66,000 flows/s) because of JSON parsing, validation, drift assessment and HTTP overhead. Per-flow calls (about 41 ms) should be batched.
+* Resident memory of the worker was about 624 MB after the run.
+* Not covered: the Docker image (no Docker daemon available), SQLite write load (`persist=false`), the CSV endpoint, rate limiting under load, multi-worker deployment and long soak runs.
+
 ---
 
 ## 12. Synthesis of Research Questions

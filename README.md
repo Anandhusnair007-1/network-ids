@@ -290,4 +290,4 @@ Beyond the dashboard, the repo includes a secured scoring API (`api/`), an incid
 signed webhook), input-drift monitoring, Ed25519-signed model manifests, a dashboard login, a folder ingestor, a Dockerfile
 with compose, and CI. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), [docs/SECURITY.md](docs/SECURITY.md) and
 [docs/RUNBOOK.md](docs/RUNBOOK.md). This is a pilot-ready system, not a finished product: it has not scored live traffic,
-the thresholds were tuned on CIC-IDS2017 only, and the Docker image and API load behaviour are untested here.
+the thresholds were tuned on CIC-IDS2017 only, and the Docker image has not been built or run here. API load was measured on one uvicorn worker (about 8,800 flows/s at 1,000-flow batches; see `reports/TECHNICAL_PROJECT_REPORT.md` section 11.6).

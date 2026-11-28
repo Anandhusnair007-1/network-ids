@@ -38,5 +38,5 @@ an hour, sink failures above 0, 5xx rate above 1%, `/readyz` failing.
 * SQLite and the in-memory rate limiter suit one API instance. For several replicas move the store to PostgreSQL and the
   limiter to the proxy or Redis.
 * The Docker image was not built or run in the development environment (no Docker daemon). CI builds it on every push.
-* Measured hybrid scoring speed (`make benchmark`, AMD Ryzen 7 6800H): about 66,000 flows/s at 10,000-flow batches and 98,700 flows/s at 50,000, model only. API throughput, SQLite write rate and
-  real network load were not load tested.
+* Measured hybrid scoring speed (`make benchmark`, AMD Ryzen 7 6800H): about 66,000 flows/s at 10,000-flow batches and 98,700 flows/s at 50,000, model only.
+* Measured API load (one uvicorn worker, loopback, `persist=false`): about 8,800 flows/s at 1,000-flow batches, 24 flows/s at one flow per request, with no errors over 1,744 requests. Throughput does not rise with concurrency, so run several workers or replicas. Details in `reports/TECHNICAL_PROJECT_REPORT.md` section 11.6. SQLite write rate, the CSV endpoint and real network load were not load tested.

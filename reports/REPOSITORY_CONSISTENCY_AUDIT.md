@@ -31,6 +31,6 @@ Already fixed before this audit: CI workflow is at `.github/workflows/ci.yml`; `
 3. `.venv` still points at host Python 3.14; the `Makefile` uses `.venv/bin/python3`. Rebuild `.venv` with Python 3.12 or run `make PYTHON=/home/anandhu/projects/.venv-network-ids-312/bin/python`.
 4. Benchmark peak RSS (2,113 MB) includes loading the full test split; it is not a serving-memory figure.
 5. Single-flow latency is 76.8 ms per call (200-tree ensembles), so per-flow API use should batch.
-6. Docker image and API load behaviour remain untested locally (no Docker daemon).
-7. Git: the changes above and `reports/FINAL_TEST_RESULTS.md`, `reports/benchmarks/` are uncommitted.
+6. Docker image not built or run locally (no Docker daemon; rootless Docker also failed with `operation not permitted`). API load was measured on one uvicorn worker and added as section 11.6 of the technical report; SQLite write load and the CSV endpoint were not load tested.
+7. Git: `models/manifest.json.sig` is deliberately untracked; it only verifies against the local `keys/manifest_public.pem`.
 8. Stratified random split shares capture days across train and test; metrics may be optimistic.
