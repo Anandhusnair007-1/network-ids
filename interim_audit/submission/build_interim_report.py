@@ -129,18 +129,22 @@ def make_p(
     return p
 
 
+# Section-heading sizes copied from "Interim Report Template - S3.docx" (half-points).
+_TEMPLATE_H1_SZ = {"Abstract": 32, "Objectives": 28, "Scope": 28, "Introduction": 28}
+
+
 def heading(text: str, level: int = 1, page_break: bool = False) -> ET.Element:
     if level == 1:
         return make_p(
             [(text, True, False)],
-            sz_hp=26,
-            align="left",
+            sz_hp=_TEMPLATE_H1_SZ.get(text, 24),
+            align="center" if text == "Abstract" else "left",
             before=220,
             after=100,
             line=240,
             keep_next=True,
             page_break_before=page_break,
-            color="1A365D",
+            color="000000",
         )
     return make_p(
         [(text, True, False)],
@@ -151,7 +155,7 @@ def heading(text: str, level: int = 1, page_break: bool = False) -> ET.Element:
         line=240,
         keep_next=True,
         page_break_before=page_break,
-        color="1E293B",
+        color="000000",
     )
 
 
@@ -450,9 +454,9 @@ def build_report() -> None:
     body.append(bullet("Dual-Engine Hybrid Detection", "Train a class-balanced 200-tree Random Forest classifier on 11 known traffic categories and a 200-tree Isolation Forest exclusively on benign flows with validation-calibrated thresholding, unified under configurable severity arbitration policies."))
     body.append(bullet("Controlled Unseen-Category Benchmarking", "Compare the hybrid detector against a Random Forest-only baseline across known attacks and four withheld attack categories to quantify both detection gains and false-alarm overhead."))
     body.append(bullet("Explainable Triage and Verification Console", "Integrate local SHAP TreeExplainer attributions, feature z-score deviations, alert grouping, and SHA-256 model integrity verification into a multipage Streamlit console."))
+    body.append(bullet("Reproducible Benchmarking", "Persist binary confusion matrices for the RF-only baseline and all four hybrid policies, and measure inference latency with a seeded, warm-up-controlled script (reports/benchmarks/run_benchmarks.py)."))
     body.append(heading("Remaining Final-Phase Objectives", level=2))
-    body.append(bullet("Environment Restoration and Test Verification", "Resolve the host Python 3.14 versus virtualenv Python 3.12 interpreter mismatch so all eight pytest suites and headless Streamlit smoke checks execute cleanly."))
-    body.append(bullet("Reproducible Latency and Confusion-Matrix Benchmarking", "Implement a standardized timing benchmark script and persist binary/multiclass confusion matrices and per-class test metrics into structured JSON outputs before the final demonstration and viva."))
+    body.append(bullet("Capture-Day Holdout and Operational Validation", "Re-evaluate with a capture-day holdout instead of the stratified random split, add per-class multiclass confusion matrices to the report, and test the API and Docker deployment under load before the final demonstration and viva."))
 
     # ---- Scope ----
     body.append(heading("Scope", level=1, page_break=True))
@@ -469,6 +473,12 @@ def build_report() -> None:
     body.append(body_p("Historically, operational perimeter monitoring has centered on rule-driven signature engines such as Snort and Suricata. Deterministic rules match known byte sequences, malformed headers, or fixed protocol patterns with very low false-alarm rates, typically below 0.1%. However, writing and maintaining signatures is inherently reactive: polymorphic attack variants, newly disclosed exploits, and low-rate lateral movements without matching rules pass undetected."))
     body.append(body_p("To overcome static rule rigidity, machine learning approaches train statistical models over summarized network flow records (for example, flow duration, inter-arrival variance, flag counts, and byte ratios). Supervised classifiers such as Random Forests routinely achieve above 99% accuracy on public benchmarks when test traffic mirrors training attack distributions. Yet in realistic environments, supervised models face a structural closed-world limitation: every incoming flow must be assigned to one of the classes observed during training. When a previously unseen attack family arrives, a confident classifier frequently maps it to the nearest normal cluster, yielding silent false negatives."))
     body.append(body_p("Unsupervised anomaly detectors address this closed-world blind spot by modeling only normal (BENIGN) behavior and flagging statistical outliers. While conceptually appealing for catching unfamiliar behavior, anomaly detection in isolation exhibits an operational drawback: normal network traffic is highly diverse, so flagging every geometric deviation inflates false positive rates to levels that overwhelm Security Operations Center (SOC) analysts. Furthermore, raw anomaly scores and complex ensemble predictions offer little explanation on their own, leaving human responders without clear feature-level evidence."))
+    body.append(body_p("Research on learning-based NIDS has grown alongside public benchmark datasets. Ahmad et al. (2021) surveyed machine learning and deep learning detectors and observed that strong benchmark accuracy often coexists with weak generalization and high false-alarm volume. Sarhan et al. (2021) compared classifiers on standardized flow features and reported that tree-based ensembles remained competitive with heavier neural models. CIC-IDS2017 (Sharafaldin et al., 2018) became a widely used benchmark because it combines realistic benign background traffic with several attack families. Later audits (Engelen et al., 2021; Rosay et al., 2022; Lanvin et al., 2023) documented duplicate records, labeling errors, and flow-construction artifacts that can inflate reported results. These findings motivate the deduplication, leakage-aware splitting, and cautious claims adopted in this study."))
+    body.append(body_p("A further difficulty is that detection accuracy alone does not describe operational value. A Security Operations Center analyst can triage only a finite number of alerts per shift, so a detector that raises thousands of marginal alerts can be less useful than one that raises fewer, better-justified alerts, even when its recall is slightly lower. Evaluation therefore has to report false positive rate and alert volume next to recall, and it has to separate alerts that demand immediate action from those better suited to later threat hunting. This study uses four severity tiers (HIGH, MEDIUM, LOW, and INFO) for that purpose."))
+    body.append(body_p("The specific aims of the project are to (i) establish a clean, deduplicated, and leakage-aware experimental setup on CIC-IDS2017; (ii) quantify what a benign-only Isolation Forest adds to a supervised Random Forest on both known and withheld attack categories; (iii) measure the false-alarm cost of that addition and test whether severity-tiered arbitration reduces it; and (iv) provide analyst-facing explanations and alert grouping in a working console. The study is a controlled offline evaluation. It does not claim live-network performance or general zero-day detection."))
+    body.append(body_p("To study unfamiliar behavior without collecting new attack traffic, four CIC-IDS2017 categories (Infiltration and three Web Attack variants) are withheld from supervised training and used only for evaluation. This is a controlled approximation of an unseen-attack scenario. Because the withheld categories share the dataset, capture environment, and benign background of the training data, the experiment measures sensitivity to categories the classifier never saw. It cannot show how the system behaves on traffic from a different network or on genuinely novel attacks, and the results are reported with that limit in mind."))
+    body.append(body_p("Explainability is treated as a requirement and not as an add-on. An alert that cannot be justified is difficult to act on, and a bare anomaly score does not say which traffic property triggered it. The system therefore pairs classifier alerts with SHAP attributions and anomaly-only alerts with feature deviations from the benign training distribution, and it groups repeated alerts so that an analyst reviews incidents instead of individual flows."))
+    body.append(body_p("The contributions of this interim phase are an end-to-end implementation, a reproducible evaluation that includes per-policy confusion matrices and a seeded latency benchmark, and an explicit account of limitations, including a stratified random split that shares capture days across the training, validation, and test partitions."))
     body.append(body_p("This case study investigates how a hybrid architecture—combining high-precision Random Forest classification with benign-trained Isolation Forest anomaly detection, policy-based severity tiering, alert consolidation, and SHAP explainability—balances threat visibility against analyst workload. The research is guided by four concrete questions:"))
     body.append(bullet("RQ1 (Supervised Fidelity)", "How accurately does a class-balanced Random Forest classify known CIC-IDS2017 attack families across multiclass and binary metrics after strict deduplication?"))
     body.append(bullet("RQ2 (Unseen-Category Visibility)", "Can an Isolation Forest trained solely on benign traffic detect attack categories completely withheld from supervised training?"))
@@ -571,7 +581,7 @@ def build_report() -> None:
 
     # ---- Expected Results ----
     body.append(heading("Expected Results", level=1, page_break=True))
-    body.append(body_p("While full runtime test re-verification and standardized latency benchmarking remain scheduled for the final phase, empirical evaluation outputs already recorded in reports/eval_results.json establish clear quantitative baselines and trade-offs."))
+    body.append(body_p("Automated verification and reproducible benchmarking are complete for this interim phase: all 89 tests pass and the stored models reproduce the metrics recorded in reports/eval_results.json (confusion matrices and latency are in reports/benchmarks/benchmark_results.json). The results below establish the quantitative baselines and trade-offs."))
     body.append(heading("1. Verified Interim Test Results (N = 504,037 Known-Split Flows)", level=2))
     body.append(make_p([("Table 4: Held-out known-attack test metrics across RF-only baseline and hybrid policies.", True, True)], sz_hp=20, align="left", before=40, after=40, line=230, keep_next=True, color="334155"))
     body.append(make_table(
@@ -608,9 +618,10 @@ def build_report() -> None:
 
     body.append(body_p("In the withheld experiment, Random Forest missed 100% of Infiltration flows (0/36), whereas Isolation Forest flagged 31/36 (86.11%) under the validation threshold (24 MEDIUM and 7 LOW under Tiered). Conversely, HTTP-layer Web Attacks were flagged at only 5.98%–19.05% because their packet sizes and timing closely resemble normal web browsing. Importantly, this controlled experiment measures sensitivity to withheld CIC-IDS2017 categories and does not constitute proof of general zero-day detection in live networks."))
 
-    body.append(heading("3. Final-Phase Verification Targets and Limitations", level=2))
-    body.append(bullet("Environment and Automated QA", "During this audit, SHA-256 verification (src/security.py, 4/4 artifacts) and Ruff linting passed, while live pytest and Streamlit AppTest execution were blocked by a host Python 3.14.4 versus virtualenv Python 3.12 mismatch. Restoring the runtime environment and running all eight test suites are immediate next-phase priorities."))
-    body.append(bullet("Benchmarking and Split Caveats", "Persisting full binary/multiclass confusion matrices, building a reproducible warm-up latency benchmark (resolving differing doc figures), and documenting the stratified random-split limitation (shared capture days across splits) will complete the final evaluation before viva."))
+    body.append(heading("3. Verification Status and Limitations", level=2))
+    body.append(bullet("Environment and Automated QA", "After rebuilding a Python 3.12 environment, all 89 tests across eight pytest suites passed, including the headless Streamlit AppTest; Ruff, compileall, Bandit and SHA-256 verification (4/4 artifacts) also passed (reports/FINAL_TEST_RESULTS.md)."))
+    body.append(bullet("Reproducible Benchmark", "A seeded script with warm-up and separate model-load timing (AMD Ryzen 7 6800H, Python 3.12.16, scikit-learn 1.9.1) reproduced all Table 4 and Table 5 figures. Median hybrid pipeline latency was 15.10 us per flow (about 66,200 flows/s) at 10,000-flow batches and 10.13 us per flow (about 98,700 flows/s) at 50,000, but 76.8 ms for a single-flow call, so scoring should be batched. Binary confusion matrices for every policy are stored with the results."))
+    body.append(bullet("Remaining Limitations", "The stratified random split shares capture days across train, validation and test, so reported metrics may be optimistic. The system has not scored live traffic, and the API and Docker image have not been load tested."))
 
     # ---- References ----
     body.append(heading("References", level=1))
