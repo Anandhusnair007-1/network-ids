@@ -127,8 +127,8 @@ All metrics measured against the unseen test split:
 
 | Pipeline | Accuracy | Precision | Recall | F1 Score | False Positive Rate | Total Alerts Raised |
 |---|---|---|---|---|---|---|
-| **RF-Only Baseline** | 99.80% | 0.9875 | 0.9994 | 0.9934 | 0.26% | 85,762 |
-| **Hybrid Baseline** | 98.24% | 0.6821 | 0.9995 | 0.8108 | 9.42% | 124,172 |
+| **RF-Only Baseline** | 99.78% | 0.9875 | 0.9994 | 0.9934 | 0.26% | 85,762 |
+| **Hybrid Baseline** | 92.16% | 0.6821 | 0.9995 | 0.8108 | 9.42% | 124,172 |
 
 ### Zero-Day / Withheld Attack Experiment ($N = 2,179$)
 
@@ -148,9 +148,12 @@ To simulate novel, zero-day threat families, four attack categories were **compl
 
 ### Inference Performance
 
-Benchmarked on an Intel Xeon @ 2.20 GHz:
-- **Vectorized NumPy Engine**: **12.16 microseconds per flow** (~82,204 flows/second throughput).
-- **Peak Process Memory**: ~280 MB during full test set streaming evaluation.
+Measured by `make benchmark` (`reports/benchmarks/benchmark_results.json`; AMD Ryzen 7 6800H, Python 3.12.16, scikit-learn 1.9.1, seed 42, warm-up excluded, model load timed separately). Median hybrid pipeline latency (scaler + Random Forest + Isolation Forest + policy) by batch size:
+- **1 flow**: 76.8 ms per call (fixed per-call cost of the 200-tree ensembles; batch for throughput).
+- **1,000 flows**: 100.3 us per flow (~9,970 flows/s).
+- **10,000 flows**: 15.10 us per flow (~66,200 flows/s).
+- **50,000 flows**: 10.13 us per flow (~98,700 flows/s).
+- **Peak process memory**: 2,113 MB RSS for the whole benchmark run (it also loads the full test split).
 
 ---
 
@@ -223,7 +226,7 @@ make check
 make dashboard
 ```
 
-Navigate to `http://localhost:8501`. The console has five pages: Overview (policy trade-offs and the novel-threat benchmark), Scan flows (sample traffic or CSV upload), Incidents, Investigate flow (SHAP evidence, deviation from baseline, anomaly-score ruler) and Detector health (integrity, score distribution, threshold sensitivity). It makes no external network requests, and Streamlit telemetry is disabled in `.streamlit/config.toml`.
+Navigate to `http://localhost:8501`. The console has six pages: Overview (policy trade-offs and the novel-threat benchmark), Scan flows (sample traffic or CSV upload), Incidents, Investigate flow (SHAP evidence, deviation from baseline, anomaly-score ruler), Alert history (stored incidents and analyst verdicts) and Detector health (integrity, score distribution, threshold sensitivity). It makes no external network requests, and Streamlit telemetry is disabled in `.streamlit/config.toml`.
 
 ---
 

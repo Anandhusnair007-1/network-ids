@@ -38,5 +38,5 @@ an hour, sink failures above 0, 5xx rate above 1%, `/readyz` failing.
 * SQLite and the in-memory rate limiter suit one API instance. For several replicas move the store to PostgreSQL and the
   limiter to the proxy or Redis.
 * The Docker image was not built or run in the development environment (no Docker daemon). CI builds it on every push.
-* Scoring speed on 2 CPU cores was about 47,000 flows/s for the model alone. API throughput, SQLite write rate and
+* Measured hybrid scoring speed (`make benchmark`, AMD Ryzen 7 6800H): about 66,000 flows/s at 10,000-flow batches and 98,700 flows/s at 50,000, model only. API throughput, SQLite write rate and
   real network load were not load tested.

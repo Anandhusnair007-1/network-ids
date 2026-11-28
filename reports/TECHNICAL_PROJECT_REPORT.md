@@ -49,9 +49,9 @@ The motivation of this project is to build an empirically grounded, realistic hy
 1. **Audit & Preprocess CIC-IDS2017:** Eliminate missing cells, infinite values, socket identifiers, and 308,381 duplicate records across 2.83M raw flows.
 2. **Execute Withheld-Category Split:** Withhold four attack families (Infiltration, Web Attack Brute Force, Web Attack XSS, Web Attack SQL Injection) completely from supervised training to benchmark novel threat visibility.
 3. **Construct Dual-Engine Detection Pipeline:** Train a 200-tree balanced Random Forest and a benign-only Isolation Forest with validation-calibrated decision thresholds.
-4. **Develop Tiered Hybrid Logic:** Design multi-tier alert severities (HIGH, MEDIUM, INFO) to manage operational workflows.
+4. **Develop Tiered Hybrid Logic:** Design multi-tier alert severities (HIGH, MEDIUM, LOW, INFO) to manage operational workflows.
 5. **Implement Explainability & Alert Triage:** Integrate SHAP TreeExplainer for per-flow feature attribution and a sliding-window Alert Grouper to mitigate alert fatigue.
-6. **Deliver Interactive SOC Dashboard:** Build a modular 5-page Streamlit interface for live prediction, triage, explainability, and anomaly inspection.
+6. **Deliver Interactive SOC Dashboard:** Build a modular 6-page Streamlit interface for live prediction, triage, explainability, alert history, and anomaly inspection.
 
 ### 4.3 Research Questions
 * **RQ1 (Supervised Fidelity):** How effectively does the Random Forest classifier identify known attack categories represented in its training data across multiclass and binary metrics?
@@ -218,15 +218,13 @@ The remaining 2,520,183 known-category flows were partitioned via stratified spl
 
 | Operational Stage | Total Batch Latency | Latency per Flow | Estimated Throughput |
 | :--- | :---: | :---: | :---: |
-| **StandardScaler Transformation** | 5.74 ms | 0.57 $\mu$s/flow | ~1,742,000 flows/sec |
-| **Random Forest Inference** | 55.88 ms | 5.59 $\mu$s/flow | ~178,950 flows/sec |
-| **Isolation Forest Decision Function** | 57.32 ms | 5.73 $\mu$s/flow | ~174,450 flows/sec |
-| **Complete Hybrid Decision Pipeline** | 157.89 ms | 15.79 $\mu$s/flow | ~63,330 flows/sec |
+| **StandardScaler Transformation** | 1.20 ms | 0.12 $\mu$s/flow | ~8,306,000 flows/sec |
+| **Random Forest Inference** | 78.62 ms | 7.86 $\mu$s/flow | ~127,200 flows/sec |
+| **Isolation Forest Decision Function** | 66.84 ms | 6.68 $\mu$s/flow | ~149,600 flows/sec |
+| **Complete Hybrid Decision Pipeline** | 151.00 ms | 15.10 $\mu$s/flow | ~66,220 flows/sec |
 
 ### 11.5 Alert Grouping & Fatigue Mitigation
-* **Raw Individual Flow Alerts:** 2,483 alerts generated across a 10,000-flow sample.
-* **Consolidated Alert Groups:** 11 triage groups formed by `AlertGrouper`.
-* **Alert Volume Compression:** **99.56% reduction** in triage surface area.
+* **Note:** the figures in this section were measured before `summarize_groups()` was corrected to keep ungrouped alerts in the analyst queue, and the original 99.56% compression is therefore not reproducible. The current method yields 8% on a 2,000-flow upload with random IPs and 2-second spacing, and 95% on a shuffled sample with batch-wide grouping (see `README.md`). Reduction depends on traffic.
 
 ---
 
@@ -235,7 +233,7 @@ The remaining 2,520,183 known-category flows were partitioned via stratified spl
 * **RQ1 (Supervised Fidelity):** Confirmed. Random Forest attains high fidelity (Macro-F1 = 0.9345, Binary Recall = 99.94%, FPR = 0.26%). However, minority classes with high benign overlap (Bot precision = 0.3525) demonstrate sensitivity limitations.
 * **RQ2 (Novel Category Detection):** Partially Confirmed. Isolation Forest detected 86.11% of unseen Infiltration attacks due to aberrant transport flow characteristics. However, it achieved only 0% to 5% detection on web attacks, proving statistical flow features cannot detect application-layer payload exploits.
 * **RQ3 (Hybrid Trade-Off & Cost):** Confirmed. The hybrid architecture elevated novel attack detection from 4.31% to 9.96% (and from 0% to 86.11% on Infiltration). However, it caused the false positive rate on known traffic to surge 36.2-fold (0.26% to 9.42%), generating 38,405 extra false alarms.
-* **RQ4 (Operational Triage & Utility):** Confirmed. SHAP TreeExplainer provided clear feature attributions for alerts, while the AlertGrouper compressed alert streams by 99.56%, making hybrid operations viable for human analysts.
+* **RQ4 (Operational Triage & Utility):** Partially confirmed. SHAP TreeExplainer provided clear feature attributions for alerts. The AlertGrouper reduced the analyst queue by 8%–95% depending on traffic structure, so the benefit is traffic-dependent.
 
 ---
 

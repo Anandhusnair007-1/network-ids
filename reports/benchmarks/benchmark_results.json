@@ -1,0 +1,789 @@
+{
+  "environment": {
+    "python": "3.12.16",
+    "platform": "Linux-7.0.0-43-generic-x86_64-with-glibc2.43",
+    "cpu_model": "AMD Ryzen 7 6800H with Radeon Graphics",
+    "cpu_count": 16,
+    "ram_total_gb": 14.36,
+    "numpy": "2.5.5",
+    "pandas": "3.1.1",
+    "scikit_learn": "1.9.1",
+    "random_seed": 42,
+    "if_threshold": 0.06110182785930004
+  },
+  "loading": {
+    "cold_load_seconds": 0.4006,
+    "load_peak_traced_mb": 85.908
+  },
+  "known_test_binary": {
+    "n_rows": 504037,
+    "rf_only": {
+      "matrix_labels": [
+        "BENIGN (0)",
+        "ATTACK (1)"
+      ],
+      "confusion_matrix": [
+        [
+          418225,
+          1072
+        ],
+        [
+          50,
+          84690
+        ]
+      ],
+      "tn": 418225,
+      "fp": 1072,
+      "fn": 50,
+      "tp": 84690,
+      "accuracy": 0.997774,
+      "precision": 0.9875,
+      "recall": 0.99941,
+      "f1": 0.993419,
+      "fpr": 0.002557,
+      "n_alerts": 85762
+    },
+    "policies": {
+      "tiered": {
+        "label": "Tiered (recommended)",
+        "actionable": {
+          "matrix_labels": [
+            "BENIGN (0)",
+            "ATTACK (1)"
+          ],
+          "confusion_matrix": [
+            [
+              405857,
+              13440
+            ],
+            [
+              50,
+              84690
+            ]
+          ],
+          "tn": 405857,
+          "fp": 13440,
+          "fn": 50,
+          "tp": 84690,
+          "accuracy": 0.973236,
+          "precision": 0.863039,
+          "recall": 0.99941,
+          "f1": 0.926232,
+          "fpr": 0.032054,
+          "n_alerts": 98130
+        },
+        "all_alerts": {
+          "matrix_labels": [
+            "BENIGN (0)",
+            "ATTACK (1)"
+          ],
+          "confusion_matrix": [
+            [
+              379820,
+              39477
+            ],
+            [
+              45,
+              84695
+            ]
+          ],
+          "tn": 379820,
+          "fp": 39477,
+          "fn": 45,
+          "tp": 84695,
+          "accuracy": 0.921589,
+          "precision": 0.682078,
+          "recall": 0.999469,
+          "f1": 0.81082,
+          "fpr": 0.09415,
+          "n_alerts": 124172
+        },
+        "severity_counts_test": {
+          "HIGH": 85762,
+          "MEDIUM": 12368,
+          "LOW": 26042,
+          "INFO": 379865
+        },
+        "withheld": {
+          "overall_actionable_rate": 0.09408,
+          "overall_all_alerts_rate": 0.099587,
+          "overall_actionable_count": 205,
+          "overall_all_alerts_count": 217,
+          "per_label": {
+            "Infiltration": {
+              "total": 36,
+              "actionable_detected": 24,
+              "actionable_rate": 0.666667,
+              "all_alerts_detected": 31,
+              "all_alerts_rate": 0.861111
+            },
+            "Web Attack \u2013 Brute Force": {
+              "total": 1470,
+              "actionable_detected": 140,
+              "actionable_rate": 0.095238,
+              "all_alerts_detected": 143,
+              "all_alerts_rate": 0.097279
+            },
+            "Web Attack \u2013 Sql Injection": {
+              "total": 21,
+              "actionable_detected": 4,
+              "actionable_rate": 0.190476,
+              "all_alerts_detected": 4,
+              "all_alerts_rate": 0.190476
+            },
+            "Web Attack \u2013 XSS": {
+              "total": 652,
+              "actionable_detected": 37,
+              "actionable_rate": 0.056748,
+              "all_alerts_detected": 39,
+              "all_alerts_rate": 0.059816
+            }
+          }
+        }
+      },
+      "baseline": {
+        "label": "Baseline (max recall)",
+        "actionable": {
+          "matrix_labels": [
+            "BENIGN (0)",
+            "ATTACK (1)"
+          ],
+          "confusion_matrix": [
+            [
+              379820,
+              39477
+            ],
+            [
+              45,
+              84695
+            ]
+          ],
+          "tn": 379820,
+          "fp": 39477,
+          "fn": 45,
+          "tp": 84695,
+          "accuracy": 0.921589,
+          "precision": 0.682078,
+          "recall": 0.999469,
+          "f1": 0.81082,
+          "fpr": 0.09415,
+          "n_alerts": 124172
+        },
+        "all_alerts": {
+          "matrix_labels": [
+            "BENIGN (0)",
+            "ATTACK (1)"
+          ],
+          "confusion_matrix": [
+            [
+              379820,
+              39477
+            ],
+            [
+              45,
+              84695
+            ]
+          ],
+          "tn": 379820,
+          "fp": 39477,
+          "fn": 45,
+          "tp": 84695,
+          "accuracy": 0.921589,
+          "precision": 0.682078,
+          "recall": 0.999469,
+          "f1": 0.81082,
+          "fpr": 0.09415,
+          "n_alerts": 124172
+        },
+        "severity_counts_test": {
+          "HIGH": 85762,
+          "MEDIUM": 38410,
+          "LOW": 0,
+          "INFO": 379865
+        },
+        "withheld": {
+          "overall_actionable_rate": 0.099587,
+          "overall_all_alerts_rate": 0.099587,
+          "overall_actionable_count": 217,
+          "overall_all_alerts_count": 217,
+          "per_label": {
+            "Infiltration": {
+              "total": 36,
+              "actionable_detected": 31,
+              "actionable_rate": 0.861111,
+              "all_alerts_detected": 31,
+              "all_alerts_rate": 0.861111
+            },
+            "Web Attack \u2013 Brute Force": {
+              "total": 1470,
+              "actionable_detected": 143,
+              "actionable_rate": 0.097279,
+              "all_alerts_detected": 143,
+              "all_alerts_rate": 0.097279
+            },
+            "Web Attack \u2013 Sql Injection": {
+              "total": 21,
+              "actionable_detected": 4,
+              "actionable_rate": 0.190476,
+              "all_alerts_detected": 4,
+              "all_alerts_rate": 0.190476
+            },
+            "Web Attack \u2013 XSS": {
+              "total": 652,
+              "actionable_detected": 39,
+              "actionable_rate": 0.059816,
+              "all_alerts_detected": 39,
+              "all_alerts_rate": 0.059816
+            }
+          }
+        }
+      },
+      "balanced": {
+        "label": "Balanced (t = 0)",
+        "actionable": {
+          "matrix_labels": [
+            "BENIGN (0)",
+            "ATTACK (1)"
+          ],
+          "confusion_matrix": [
+            [
+              397556,
+              21741
+            ],
+            [
+              48,
+              84692
+            ]
+          ],
+          "tn": 397556,
+          "fp": 21741,
+          "fn": 48,
+          "tp": 84692,
+          "accuracy": 0.956771,
+          "precision": 0.795731,
+          "recall": 0.999434,
+          "f1": 0.886025,
+          "fpr": 0.051851,
+          "n_alerts": 106433
+        },
+        "all_alerts": {
+          "matrix_labels": [
+            "BENIGN (0)",
+            "ATTACK (1)"
+          ],
+          "confusion_matrix": [
+            [
+              397556,
+              21741
+            ],
+            [
+              48,
+              84692
+            ]
+          ],
+          "tn": 397556,
+          "fp": 21741,
+          "fn": 48,
+          "tp": 84692,
+          "accuracy": 0.956771,
+          "precision": 0.795731,
+          "recall": 0.999434,
+          "f1": 0.886025,
+          "fpr": 0.051851,
+          "n_alerts": 106433
+        },
+        "severity_counts_test": {
+          "HIGH": 85762,
+          "MEDIUM": 20671,
+          "LOW": 0,
+          "INFO": 397604
+        },
+        "withheld": {
+          "overall_actionable_rate": 0.096374,
+          "overall_all_alerts_rate": 0.096374,
+          "overall_actionable_count": 210,
+          "overall_all_alerts_count": 210,
+          "per_label": {
+            "Infiltration": {
+              "total": 36,
+              "actionable_detected": 28,
+              "actionable_rate": 0.777778,
+              "all_alerts_detected": 28,
+              "all_alerts_rate": 0.777778
+            },
+            "Web Attack \u2013 Brute Force": {
+              "total": 1470,
+              "actionable_detected": 141,
+              "actionable_rate": 0.095918,
+              "all_alerts_detected": 141,
+              "all_alerts_rate": 0.095918
+            },
+            "Web Attack \u2013 Sql Injection": {
+              "total": 21,
+              "actionable_detected": 4,
+              "actionable_rate": 0.190476,
+              "all_alerts_detected": 4,
+              "all_alerts_rate": 0.190476
+            },
+            "Web Attack \u2013 XSS": {
+              "total": 652,
+              "actionable_detected": 37,
+              "actionable_rate": 0.056748,
+              "all_alerts_detected": 37,
+              "all_alerts_rate": 0.056748
+            }
+          }
+        }
+      },
+      "confidence_gated": {
+        "label": "Confidence-gated (beta)",
+        "actionable": {
+          "matrix_labels": [
+            "BENIGN (0)",
+            "ATTACK (1)"
+          ],
+          "confusion_matrix": [
+            [
+              405533,
+              13764
+            ],
+            [
+              45,
+              84695
+            ]
+          ],
+          "tn": 405533,
+          "fp": 13764,
+          "fn": 45,
+          "tp": 84695,
+          "accuracy": 0.972603,
+          "precision": 0.860206,
+          "recall": 0.999469,
+          "f1": 0.924623,
+          "fpr": 0.032826,
+          "n_alerts": 98459
+        },
+        "all_alerts": {
+          "matrix_labels": [
+            "BENIGN (0)",
+            "ATTACK (1)"
+          ],
+          "confusion_matrix": [
+            [
+              405533,
+              13764
+            ],
+            [
+              45,
+              84695
+            ]
+          ],
+          "tn": 405533,
+          "fp": 13764,
+          "fn": 45,
+          "tp": 84695,
+          "accuracy": 0.972603,
+          "precision": 0.860206,
+          "recall": 0.999469,
+          "f1": 0.924623,
+          "fpr": 0.032826,
+          "n_alerts": 98459
+        },
+        "severity_counts_test": {
+          "HIGH": 85762,
+          "MEDIUM": 12697,
+          "LOW": 0,
+          "INFO": 405578
+        },
+        "withheld": {
+          "overall_actionable_rate": 0.099587,
+          "overall_all_alerts_rate": 0.099587,
+          "overall_actionable_count": 217,
+          "overall_all_alerts_count": 217,
+          "per_label": {
+            "Infiltration": {
+              "total": 36,
+              "actionable_detected": 31,
+              "actionable_rate": 0.861111,
+              "all_alerts_detected": 31,
+              "all_alerts_rate": 0.861111
+            },
+            "Web Attack \u2013 Brute Force": {
+              "total": 1470,
+              "actionable_detected": 143,
+              "actionable_rate": 0.097279,
+              "all_alerts_detected": 143,
+              "all_alerts_rate": 0.097279
+            },
+            "Web Attack \u2013 Sql Injection": {
+              "total": 21,
+              "actionable_detected": 4,
+              "actionable_rate": 0.190476,
+              "all_alerts_detected": 4,
+              "all_alerts_rate": 0.190476
+            },
+            "Web Attack \u2013 XSS": {
+              "total": 652,
+              "actionable_detected": 39,
+              "actionable_rate": 0.059816,
+              "all_alerts_detected": 39,
+              "all_alerts_rate": 0.059816
+            }
+          }
+        }
+      }
+    }
+  },
+  "known_test_multiclass_rf": {
+    "n_rows": 504037,
+    "classes": [
+      "BENIGN",
+      "Bot",
+      "DDoS",
+      "DoS GoldenEye",
+      "DoS Hulk",
+      "DoS Slowhttptest",
+      "DoS slowloris",
+      "FTP-Patator",
+      "Heartbleed",
+      "PortScan",
+      "SSH-Patator"
+    ],
+    "accuracy": 0.997701,
+    "macro_precision": 0.906545,
+    "macro_recall": 0.995076,
+    "macro_f1": 0.934522,
+    "weighted_f1": 0.998031,
+    "per_class": {
+      "BENIGN": {
+        "precision": 0.99988,
+        "recall": 0.997443,
+        "f1": 0.99866,
+        "support": 419297
+      },
+      "Bot": {
+        "precision": 0.352451,
+        "recall": 0.974425,
+        "f1": 0.517663,
+        "support": 391
+      },
+      "DDoS": {
+        "precision": 0.999453,
+        "recall": 0.999727,
+        "f1": 0.99959,
+        "support": 25603
+      },
+      "DoS GoldenEye": {
+        "precision": 0.989845,
+        "recall": 0.995139,
+        "f1": 0.992485,
+        "support": 2057
+      },
+      "DoS Hulk": {
+        "precision": 0.995217,
+        "recall": 0.999219,
+        "f1": 0.997214,
+        "support": 34570
+      },
+      "DoS Slowhttptest": {
+        "precision": 0.985782,
+        "recall": 0.994264,
+        "f1": 0.990005,
+        "support": 1046
+      },
+      "DoS slowloris": {
+        "precision": 0.994424,
+        "recall": 0.9935,
+        "f1": 0.993962,
+        "support": 1077
+      },
+      "FTP-Patator": {
+        "precision": 0.998315,
+        "recall": 0.999157,
+        "f1": 0.998736,
+        "support": 1186
+      },
+      "Heartbleed": {
+        "precision": 0.666667,
+        "recall": 1.0,
+        "f1": 0.8,
+        "support": 2
+      },
+      "PortScan": {
+        "precision": 0.989963,
+        "recall": 0.999174,
+        "f1": 0.994547,
+        "support": 18164
+      },
+      "SSH-Patator": {
+        "precision": 1.0,
+        "recall": 0.993789,
+        "f1": 0.996885,
+        "support": 644
+      }
+    },
+    "confusion_matrix": [
+      [
+        418225,
+        700,
+        10,
+        9,
+        152,
+        12,
+        3,
+        2,
+        1,
+        183,
+        0
+      ],
+      [
+        10,
+        381,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        6,
+        0,
+        25596,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        5,
+        0,
+        0,
+        2047,
+        5,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        10,
+        0,
+        4,
+        12,
+        34543,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      [
+        5,
+        0,
+        0,
+        0,
+        0,
+        1040,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0,
+        0,
+        3,
+        1070,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1185,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        0,
+        0
+      ],
+      [
+        5,
+        0,
+        0,
+        0,
+        8,
+        0,
+        2,
+        0,
+        0,
+        18149,
+        0
+      ],
+      [
+        4,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        640
+      ]
+    ]
+  },
+  "withheld_experiment": {
+    "total": 2179,
+    "rf_detected": 94,
+    "if_detected": 123,
+    "hybrid_baseline_detected": 217,
+    "per_label": {
+      "Infiltration": {
+        "total": 36,
+        "rf_detected": 0,
+        "if_detected": 31,
+        "hybrid_baseline_detected": 31
+      },
+      "Web Attack \u2013 Brute Force": {
+        "total": 1470,
+        "rf_detected": 69,
+        "if_detected": 74,
+        "hybrid_baseline_detected": 143
+      },
+      "Web Attack \u2013 Sql Injection": {
+        "total": 21,
+        "rf_detected": 4,
+        "if_detected": 0,
+        "hybrid_baseline_detected": 4
+      },
+      "Web Attack \u2013 XSS": {
+        "total": 652,
+        "rf_detected": 21,
+        "if_detected": 18,
+        "hybrid_baseline_detected": 39
+      }
+    }
+  },
+  "latency_benchmark": {
+    "policy": "tiered",
+    "process_peak_rss_mb": 2112.84,
+    "batches": [
+      {
+        "batch_size": 1,
+        "warmup_iters": 50,
+        "timed_iters": 200,
+        "total_ms_median": 76.8077,
+        "total_ms_p95": 81.5347,
+        "total_ms_p99": 85.4631,
+        "us_per_flow_median": 76807.675,
+        "throughput_flows_per_sec_median": 13.0,
+        "stage_median_ms": {
+          "scaler": 0.3627,
+          "rf_predict_proba": 52.2362,
+          "iforest_decision_function": 24.214
+        },
+        "peak_traced_alloc_mb": 0.518
+      },
+      {
+        "batch_size": 100,
+        "warmup_iters": 15,
+        "timed_iters": 50,
+        "total_ms_median": 83.8336,
+        "total_ms_p95": 87.3008,
+        "total_ms_p99": 90.191,
+        "us_per_flow_median": 838.336,
+        "throughput_flows_per_sec_median": 1192.8,
+        "stage_median_ms": {
+          "scaler": 0.3873,
+          "rf_predict_proba": 58.1578,
+          "iforest_decision_function": 24.8996
+        },
+        "peak_traced_alloc_mb": 0.584
+      },
+      {
+        "batch_size": 1000,
+        "warmup_iters": 10,
+        "timed_iters": 30,
+        "total_ms_median": 100.2591,
+        "total_ms_p95": 101.7679,
+        "total_ms_p99": 102.1469,
+        "us_per_flow_median": 100.259,
+        "throughput_flows_per_sec_median": 9974.2,
+        "stage_median_ms": {
+          "scaler": 0.4531,
+          "rf_predict_proba": 68.3513,
+          "iforest_decision_function": 30.2591
+        },
+        "peak_traced_alloc_mb": 2.394
+      },
+      {
+        "batch_size": 10000,
+        "warmup_iters": 5,
+        "timed_iters": 20,
+        "total_ms_median": 151.0042,
+        "total_ms_p95": 152.8013,
+        "total_ms_p99": 152.9056,
+        "us_per_flow_median": 15.1,
+        "throughput_flows_per_sec_median": 66223.3,
+        "stage_median_ms": {
+          "scaler": 1.204,
+          "rf_predict_proba": 78.616,
+          "iforest_decision_function": 66.8374
+        },
+        "peak_traced_alloc_mb": 20.898
+      },
+      {
+        "batch_size": 50000,
+        "warmup_iters": 3,
+        "timed_iters": 10,
+        "total_ms_median": 506.6832,
+        "total_ms_p95": 546.3949,
+        "total_ms_p99": 557.5295,
+        "us_per_flow_median": 10.134,
+        "throughput_flows_per_sec_median": 98681.0,
+        "stage_median_ms": {
+          "scaler": 5.3217,
+          "rf_predict_proba": 221.9317,
+          "iforest_decision_function": 262.6311
+        },
+        "peak_traced_alloc_mb": 99.433
+      }
+    ]
+  }
+}

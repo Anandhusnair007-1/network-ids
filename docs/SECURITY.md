@@ -12,7 +12,7 @@ Flow data from the network is untrusted. Model files and the manifest are truste
 | Unauthenticated API use | API keys (constant-time compare over all keys), refuses to start with none | `api/main.py` |
 | Abuse and brute force | Per-key rate limit (429 with Retry-After) | `api/main.py` |
 | Memory exhaustion | Body cap counted on streamed bytes, row cap, file-size cap | `BodyLimitMiddleware`, `validator.py` |
-| Malformed or hostile input | Strict schema validation, NaN/inf rejection, no zero-fill unless asked | `src/validator.py` |
+| Malformed or hostile input | Strict schema validation (all 78 columns required), row cap, NaN/inf/non-numeric sanitisation to 0.0, no zero-fill of missing columns unless asked | `src/validator.py` |
 | SQL injection | Parameterised queries only; tested with hostile input | `src/store.py` |
 | SSRF through the API | Webhook and syslog targets come only from operator config | `src/sinks.py` |
 | Log or CEF injection | Newline and delimiter escaping | `src/sinks.py` |
