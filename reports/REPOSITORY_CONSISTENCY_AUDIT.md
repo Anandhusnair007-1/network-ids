@@ -22,13 +22,13 @@ Already fixed before this audit: CI workflow is at `.github/workflows/ci.yml`; `
 - `pytest tests -q`: 89 passed after the edits.
 - `make -n manifest drift-reference keygen sign benchmark check`: all targets resolve.
 - `make benchmark` equivalent (`run_benchmarks.py`) reproduced the published numbers: RF-only precision 0.9875 / recall 0.99941 / FPR 0.002557; Tiered precision 0.863039 / FPR 0.032054; Baseline precision 0.682078 / FPR 0.09415; withheld 94 / 123 / 217 detected.
-- New targets other than `manifest`/`benchmark` logic were dry-run only; `keygen`, `sign`, `drift-reference` were not executed, to avoid creating keys or overwriting `models/drift_reference.json`.
+- Of the new Makefile targets, `manifest` and `benchmark` were verified by running them; `keygen`, `sign` and `drift-reference` were dry-run at the time of this audit and executed afterwards (`models/drift_reference.json` regenerated and committed; keys and `models/manifest.json.sig` created locally and not tracked).
 
 ## Open items (not changed)
 
-1. `reports/TECHNICAL_PROJECT_REPORT.md` section 11.4 per-stage rows (scaler 5.74 ms, RF 55.88 ms, IF 57.32 ms) come from the old run and do not sum to the new total (151.00 ms). Re-measure per stage or drop those rows.
-2. The same report's section 11.1 and the README (RF accuracy 99.80%) differ slightly from the measured 99.77% (`rf_only.accuracy` 0.997774, multiclass 0.997701). Rounding or older run; align when the report is next regenerated.
-3. `.venv` still points at host Python 3.14; the `Makefile` uses `.venv/bin/python3`. Rebuild `.venv` with Python 3.12 or run `make PYTHON=/home/anandhu/projects/.venv-network-ids-312/bin/python`.
+1. Resolved: `reports/TECHNICAL_PROJECT_REPORT.md` section 11.4 per-stage rows now use the measured 10,000-flow medians from `reports/benchmarks/benchmark_results.json` (scaler 1.20 ms, RF 78.62 ms, IF 66.84 ms; the 151.00 ms total also includes policy and overhead).
+2. Resolved for the README: RF-only accuracy is now 99.78% (`rf_only.accuracy` 0.997774). Section 11.1 of the report is the multiclass table and was not changed; the measured multiclass test accuracy is 99.77% (0.997701).
+3. Resolved: `.venv` was rebuilt with Python 3.12.16 from `requirements-dev.txt`; `make` targets use it without `PYTHON=`.
 4. Benchmark peak RSS (2,113 MB) includes loading the full test split; it is not a serving-memory figure.
 5. Single-flow latency is 76.8 ms per call (200-tree ensembles), so per-flow API use should batch.
 6. Docker image not built or run locally (no Docker daemon; rootless Docker also failed with `operation not permitted`). API load was measured on one uvicorn worker and added as section 11.6 of the technical report; SQLite write load and the CSV endpoint were not load tested.
