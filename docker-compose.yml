@@ -46,6 +46,9 @@ services:
     tmpfs: [/tmp]
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
+    # The image HEALTHCHECK probes the API port, which this worker does not serve.
+    healthcheck:
+      disable: true
     restart: unless-stopped
     profiles: ["ingest"]
 
