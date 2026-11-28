@@ -144,6 +144,8 @@ The remaining 2,520,183 known-category flows were partitioned via stratified spl
 * **Validation Split (20%):** 504,037 flows (419,297 BENIGN, 84,740 Known Attacks)
 * **Test Split (20%):** 504,037 flows (419,297 BENIGN, 84,740 Known Attacks)
 
+**Limitation:** this is a stratified random split, so flows from the same capture day appear in all three partitions. Reported metrics may be optimistic compared with a split by capture day or a different network. A day-based split would require retraining and was not performed.
+
 ---
 
 ## 10. Model Design & Hybrid Decision Logic

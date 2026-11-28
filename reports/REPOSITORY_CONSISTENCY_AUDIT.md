@@ -29,8 +29,8 @@ Already fixed before this audit: CI workflow is at `.github/workflows/ci.yml`; `
 1. Resolved: `reports/TECHNICAL_PROJECT_REPORT.md` section 11.4 per-stage rows now use the measured 10,000-flow medians from `reports/benchmarks/benchmark_results.json` (scaler 1.20 ms, RF 78.62 ms, IF 66.84 ms; the 151.00 ms total also includes policy and overhead).
 2. Resolved for the README: RF-only accuracy is now 99.78% (`rf_only.accuracy` 0.997774). Section 11.1 of the report is the multiclass table and was not changed; the measured multiclass test accuracy is 99.77% (0.997701).
 3. Resolved: `.venv` was rebuilt with Python 3.12.16 from `requirements-dev.txt`; `make` targets use it without `PYTHON=`.
-4. Benchmark peak RSS (2,113 MB) includes loading the full test split; it is not a serving-memory figure.
-5. Single-flow latency is 76.8 ms per call (200-tree ensembles), so per-flow API use should batch.
-6. Docker image not built or run locally (no Docker daemon; rootless Docker also failed with `operation not permitted`). API load was measured on one uvicorn worker and added as section 11.6 of the technical report; SQLite write load and the CSV endpoint were not load tested.
-7. Git: `models/manifest.json.sig` is deliberately untracked; it only verifies against the local `keys/manifest_public.pem`.
-8. Stratified random split shares capture days across train and test; metrics may be optimistic.
+4. Resolved: README now labels the 2,113 MB benchmark RSS as not a serving figure and adds the measured serving RSS (about 624 MB, one uvicorn worker after the load test).
+5. Documented, no code change: single-flow latency is 76.8 ms per call (200-tree ensembles). README, `docs/DEPLOYMENT.md` and report section 11.6 say to batch.
+6. Open, blocked: Docker image not built or run locally (no Docker daemon; rootless Docker failed with `operation not permitted`). Run `docker compose build api` on a host with Docker. API load was measured on one uvicorn worker (report section 11.6); SQLite write load and the CSV endpoint were not load tested.
+7. By design: `models/manifest.json.sig` is deliberately untracked; it only verifies against the local `keys/manifest_public.pem`.
+8. Documented, not fixable without retraining: the stratified random split shares capture days across train, validation and test. The limitation is now stated in the README and report section 9.3; a day-based split needs retraining, which is out of scope.

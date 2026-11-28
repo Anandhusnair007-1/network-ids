@@ -120,6 +120,7 @@ Measured on the 504,037-flow test split ("actionable" = High + Medium alerts, i.
   - Known limitation: the 78-column schema still contains 8 constant columns (`Bwd PSH Flags`, `Bwd URG Flags`, and the six `*Bulk*` features) and a duplicate (`Fwd Header Length.1`). They are harmless to tree models; removing them requires retraining and would change the manifest.
   - Stripped leading/trailing whitespace from header columns and sanitized infinite/null values.
   - Final processed split: 60% train / 20% validation / 20% held-out test (504,037 flows), stratified, known categories only.
+  - Known limitation: the split is a stratified random split, so flows from the same capture day appear in train, validation and test. Reported metrics may be optimistic compared with a split by capture day or a different network; this was not tested.
 
 ### Held-Out Test Evaluation ($N = 504,037$)
 
@@ -153,7 +154,8 @@ Measured by `make benchmark` (`reports/benchmarks/benchmark_results.json`; AMD R
 - **1,000 flows**: 100.3 us per flow (~9,970 flows/s).
 - **10,000 flows**: 15.10 us per flow (~66,200 flows/s).
 - **50,000 flows**: 10.13 us per flow (~98,700 flows/s).
-- **Peak process memory**: 2,113 MB RSS for the whole benchmark run (it also loads the full test split).
+- **Peak process memory**: 2,113 MB RSS for the whole benchmark run (it also loads the full test split; not a serving figure).
+- **Serving memory**: about 624 MB RSS for one uvicorn worker after 1,744 scoring requests (`reports/TECHNICAL_PROJECT_REPORT.md` section 11.6).
 
 ---
 
